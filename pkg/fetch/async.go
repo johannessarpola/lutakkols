@@ -98,6 +98,7 @@ func FilterError[T any](resChan <-chan Result[*T], onError func(err error), cont
 	return out
 }
 
+// TODO need to add configurable ratelimit
 func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[*models.Event], <-chan error) {
 	resChan := make(chan Result[*models.Event])
 	errChan := make(chan error, 1)
@@ -110,7 +111,6 @@ func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[
 		var ord atomic.Int32
 		ord.Store(0)
 		c.OnHTML(selectors.Events, func(e *colly.HTMLElement) {
-			time.Sleep(time.Second * 2) // TODO Remove, currently for rate limiting
 			evt := handleEvent(&ord, e)
 			r := Result[*models.Event]{
 				Val: &evt,

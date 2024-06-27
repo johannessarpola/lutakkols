@@ -29,7 +29,7 @@ var TestCmd = &cobra.Command{
 		logger.SetLogger(&logger.StdOutLogger{})
 
 		op := v.GetString("input_url")
-		defaultTimeout := time.Second * 8
+		defaultTimeout := time.Second * 30
 		as := fetch.AsyncSource{}
 		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 		defer cancel()
@@ -46,13 +46,11 @@ var TestCmd = &cobra.Command{
 			// write events
 			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 			defer cancel()
-			fmt.Println("collecting ...")
 			all, err := fetch.Collect(events, subCtx)
 			if err != nil {
 				fmt.Println(err)
 			}
 
-			fmt.Printf("writing into file size %d\n", len(all))
 			err = writer.WriteJson(all, ".data/evts.json", writer.PrettyPrint)
 			if err != nil {
 				fmt.Println(err)
@@ -66,30 +64,30 @@ var TestCmd = &cobra.Command{
 			fmt.Println("details error ", err)
 		}, ctx)
 
-		d1, d2 := fetch.FanOut(details, ctx)
+		//d1, d2 := fetch.FanOut(details, ctx)
 
 		go func(details <-chan models.EventDetails) {
 			wg.Add(1)
 			// write details
 			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 			defer cancel()
-			fmt.Println("collecting ...")
+
 			all, err := fetch.Collect(details, subCtx)
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Printf("writing into file size %d\n", len(all))
+
 			err = writer.WriteJson(all, ".data/dtls.json", writer.PrettyPrint)
 			if err != nil {
 				fmt.Println(err)
 			}
 			wg.Done()
-		}(d2)
+		}(details)
 
-		asciiResults := as.Images(d1, ctx)
-		ascii := fetch.FilterError(asciiResults, func(err error) {
-			fmt.Println("ascii error ", err)
-		}, ctx)
+		//asciiResults := as.Images(d1, ctx)
+		//ascii := fetch.FilterError(asciiResults, func(err error) {
+		//	fmt.Println("ascii error ", err)
+		//}, ctx)
 
 	consume:
 		for {
@@ -100,8 +98,8 @@ var TestCmd = &cobra.Command{
 			case err := <-errs:
 				fmt.Println("main loop - error:", err)
 				break consume
-			case a := <-ascii:
-				fmt.Printf("main loop - got ascii %s\n", a.EventID)
+				//case a := <-ascii:
+				//	fmt.Printf("main loop - got ascii %s\n", a.EventID)
 			}
 
 		}
