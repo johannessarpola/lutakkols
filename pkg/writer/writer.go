@@ -30,7 +30,7 @@ func WriteJson(data interface{}, outFile string, opts ...WriteOption) error {
 		jsonData []byte
 	)
 
-	if options.Has(options.PrettyPrint, opts) {
+	if options.Has(PrettyPrint, opts) {
 		jsonData, err = json.MarshalIndent(data, "", "  ")
 	} else {
 		jsonData, err = json.Marshal(data)

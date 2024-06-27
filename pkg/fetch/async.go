@@ -30,12 +30,15 @@ func Collect[T any](in <-chan T, ctx context.Context) ([]T, error) {
 	for {
 		select {
 		case <-ctx.Done():
+			fmt.Println("Collect --> done")
 			return result, ctx.Err()
 		case v, ok := <-in:
 			if !ok {
+				fmt.Printf("Collect --> !ok (size:%d)\n", len(result))
 				// Channel closed, return the collected result
 				return result, nil
 			}
+			fmt.Println("Collect --> ", v)
 			result = append(result, v)
 		}
 	}
@@ -73,7 +76,7 @@ func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
 	return o1, o2
 }
 
-func FilterError[T any](resChan <-chan Result[T], onError func(err error), context context.Context) <-chan T {
+func FilterError[T any](resChan <-chan Result[*T], onError func(err error), context context.Context) <-chan T {
 	out := make(chan T)
 	go func(onError func(err error)) {
 		defer close(out)
@@ -85,7 +88,7 @@ func FilterError[T any](resChan <-chan Result[T], onError func(err error), conte
 				if !ok {
 					return
 				}
-				out <- res.Val
+				out <- *res.Val
 			}
 		}
 	}(onError)
@@ -133,7 +136,7 @@ func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[
 	return resChan, errChan
 }
 
-func (a AsyncSource) Images(eds <-chan *models.EventDetails, context context.Context) <-chan Result[*models.EventAscii] {
+func (a AsyncSource) Images(eds <-chan models.EventDetails, context context.Context) <-chan Result[*models.EventAscii] {
 	resChan := make(chan Result[*models.EventAscii])
 
 	go func() {
@@ -146,10 +149,6 @@ func (a AsyncSource) Images(eds <-chan *models.EventDetails, context context.Con
 				fmt.Printf("fetching image from %s\n", ed.ImageURL())
 				if !ok {
 					return
-				}
-				// TODO There's better way for this, so fix later
-				if ed == nil {
-					continue
 				}
 				v, err := EventImage(ed.ImageURL())
 				resChan <- Result[*models.EventAscii]{
@@ -167,7 +166,7 @@ func (a AsyncSource) Images(eds <-chan *models.EventDetails, context context.Con
 	return resChan
 }
 
-func (a AsyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-chan Result[*models.EventDetails] {
+func (a AsyncSource) Details(eps <-chan models.Event, ctx context.Context) <-chan Result[*models.EventDetails] {
 	resChan := make(chan Result[*models.EventDetails])
 	go func() {
 		defer close(resChan)
@@ -179,10 +178,6 @@ func (a AsyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-ch
 			case ep, ok := <-eps:
 				if !ok {
 					return
-				}
-				// TODO There's better way for this, so fix later
-				if ep == nil {
-					continue
 				}
 				fmt.Printf("fetching details from %s\n", ep.EventURL())
 				v, err := EventDetails(ep.EventURL(), ep.ID())

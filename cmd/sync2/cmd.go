@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch"
+	"github.com/johannessarpola/lutakkols/pkg/writer"
 	"github.com/spf13/cobra"
 	v "github.com/spf13/viper"
+	"sync"
 	"time"
 )
 
@@ -23,15 +25,38 @@ var TestCmd = &cobra.Command{
 	Long:  "Syncs data",
 	Run: func(cmd *cobra.Command, args []string) {
 		op := v.GetString("input_url")
-
+		defaultTimeout := time.Second * 8
 		as := fetch.AsyncSource{}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 		defer cancel()
 		eventResults, errs := as.Events(op, ctx)
 		events := fetch.FilterError(eventResults, func(err error) {
 			fmt.Println("event error ", err)
 		}, ctx)
-		detailResults := as.Details(events, ctx)
+		e1, e2 := fetch.FanOut(events, ctx)
+
+		var wg sync.WaitGroup
+
+		go func(events <-chan models.Event) {
+			wg.Add(1)
+			// write events
+			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+			defer cancel()
+			fmt.Println("collecting ...")
+			all, err := fetch.Collect(events, subCtx)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			fmt.Printf("writing into file size %d\n", len(all))
+			err = writer.WriteJson(all, ".data/evts.json", writer.PrettyPrint)
+			if err != nil {
+				fmt.Println(err)
+			}
+			wg.Done()
+		}(e2)
+
+		detailResults := as.Details(e1, ctx)
 
 		details := fetch.FilterError(detailResults, func(err error) {
 			fmt.Println("details error ", err)
@@ -39,13 +64,22 @@ var TestCmd = &cobra.Command{
 
 		d1, d2 := fetch.FanOut(details, ctx)
 
-		go func(details <-chan *models.EventDetails) {
+		go func(details <-chan models.EventDetails) {
+			wg.Add(1)
 			// write details
-			all, err := fetch.Collect(d2)
+			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+			defer cancel()
+			fmt.Println("collecting ...")
+			all, err := fetch.Collect(details, subCtx)
 			if err != nil {
 				fmt.Println(err)
 			}
-
+			fmt.Printf("writing into file size %d\n", len(all))
+			err = writer.WriteJson(all, ".data/dtls.json", writer.PrettyPrint)
+			if err != nil {
+				fmt.Println(err)
+			}
+			wg.Done()
 		}(d2)
 
 		asciiResults := as.Images(d1, ctx)
@@ -53,19 +87,21 @@ var TestCmd = &cobra.Command{
 			fmt.Println("ascii error ", err)
 		}, ctx)
 
+	consume:
 		for {
 			select {
 			case <-ctx.Done():
 				fmt.Println("context done")
-				return
+				break consume
 			case err := <-errs:
 				fmt.Println("main loop - error:", err)
-				return
+				break consume
 			case a := <-ascii:
-				fmt.Printf("main loop - got ascii %s\n", a.Ascii)
+				fmt.Printf("main loop - got ascii %s\n", a.EventID)
 			}
 
 		}
+		wg.Wait()
 
 	},
 }
