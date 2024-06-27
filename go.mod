@@ -1,4 +1,5 @@
 module github.com/johannessarpola/lutakkols
+
 go 1.22.0
 
 require (
@@ -6,7 +7,6 @@ require (
 	github.com/charmbracelet/bubbletea v0.26.6
 	github.com/charmbracelet/lipgloss v0.11.0
 	github.com/gocolly/colly/v2 v2.1.0
-	github.com/johannessarpola/go-pool v1.0.0
 	github.com/maypok86/otter v1.2.1
 	github.com/qeesung/image2ascii v1.0.1
 	github.com/spf13/cobra v1.8.1
