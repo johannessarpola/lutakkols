@@ -23,6 +23,24 @@ type Result[T any] struct {
 
 type AsyncSource struct{}
 
+// Collect reads from the input channel and collects elements into a slice.
+// It respects the provided context for cancellation.
+func Collect[T any](in <-chan T, ctx context.Context) ([]T, error) {
+	var result []T
+	for {
+		select {
+		case <-ctx.Done():
+			return result, ctx.Err()
+		case v, ok := <-in:
+			if !ok {
+				// Channel closed, return the collected result
+				return result, nil
+			}
+			result = append(result, v)
+		}
+	}
+}
+
 func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
 	o1 := make(chan T)
 	o2 := make(chan T)
@@ -37,8 +55,17 @@ func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
 				if !ok {
 					return
 				}
-				o1 <- v
-				o2 <- v
+				// Non-blocking send using select to prevent goroutine leak
+				select {
+				case o1 <- v:
+				case <-ctx.Done():
+					return
+				}
+				select {
+				case o2 <- v:
+				case <-ctx.Done():
+					return
+				}
 			}
 		}
 	}()
@@ -78,6 +105,7 @@ func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[
 		var ord atomic.Int32
 		ord.Store(0)
 		c.OnHTML(selectors.Events, func(e *colly.HTMLElement) {
+			time.Sleep(time.Second * 2) // TODO Remove, currently for rate limiting
 			evt := handleEvent(&ord, e)
 			r := Result[*models.Event]{
 				Val: &evt,

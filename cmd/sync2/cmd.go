@@ -24,7 +24,7 @@ var TestCmd = &cobra.Command{
 		op := v.GetString("input_url")
 
 		as := fetch.AsyncSource{}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
 		eventResults, errs := as.Events(op, ctx)
 		events := fetch.FilterError(eventResults, func(err error) {
@@ -40,6 +40,7 @@ var TestCmd = &cobra.Command{
 		ascii := fetch.FilterError(asciiResults, func(err error) {
 			fmt.Println("ascii error ", err)
 		}, ctx)
+
 		for {
 			select {
 			case <-ctx.Done():
