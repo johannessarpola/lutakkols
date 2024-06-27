@@ -6,6 +6,8 @@ import (
 	"github.com/gocolly/colly/v2"
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch/selectors"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
+	"reflect"
 	"sync/atomic"
 	"time"
 )
@@ -30,15 +32,14 @@ func Collect[T any](in <-chan T, ctx context.Context) ([]T, error) {
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("Collect --> done")
+			logger.Log.Warnf("Timeout exceeded, returning %s of size %d", reflect.TypeOf(result), len(result))
 			return result, ctx.Err()
 		case v, ok := <-in:
 			if !ok {
-				fmt.Printf("Collect --> !ok (size:%d)\n", len(result))
+				logger.Log.Debugf("Collected %s of size %d from input channel", reflect.TypeOf(result), len(result))
 				// Channel closed, return the collected result
 				return result, nil
 			}
-			fmt.Println("Collect --> ", v)
 			result = append(result, v)
 		}
 	}
