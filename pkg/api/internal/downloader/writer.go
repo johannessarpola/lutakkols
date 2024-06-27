@@ -2,7 +2,7 @@ package downloader
 
 import (
 	"encoding/json"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/options"
+	"github.com/johannessarpola/lutakkols/pkg/api/options"
 	"os"
 )
 

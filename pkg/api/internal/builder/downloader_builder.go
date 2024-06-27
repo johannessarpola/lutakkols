@@ -2,8 +2,8 @@ package builder
 
 import (
 	"errors"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/internal/downloader"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/logger"
+	"github.com/johannessarpola/lutakkols/pkg/api/internal/downloader"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 )
 
 const defaultPoolSize = 4

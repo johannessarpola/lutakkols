@@ -2,9 +2,9 @@ package provider
 
 import (
 	"errors"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/internal/builder"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/models"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/options"
+	"github.com/johannessarpola/lutakkols/pkg/api/internal/builder"
+	"github.com/johannessarpola/lutakkols/pkg/api/models"
+	"github.com/johannessarpola/lutakkols/pkg/api/options"
 )
 
 type Config struct {

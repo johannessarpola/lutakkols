@@ -92,8 +92,8 @@ github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/jawher/mow.cli v1.1.0/go.mod h1:aNaQlc7ozF3vw6IJ2dHjp2ZFiA4ozMIYY6PyuRJwlUg=
-github.com/johannessarpola/go-lutakko-gigs/pkg/api v1.1.0 h1:OWmmG7XD1JyswK3S/3GG3Ok5lGdoHLKefLbAJ5K3u1k=
-github.com/johannessarpola/go-lutakko-gigs/pkg/api v1.1.0/go.mod h1:lAsTukHxLkM2IYexD0E2T79oRSpvPLqd/B/rZsf3mrU=
+github.com/johannessarpola/lutakkols/pkg/api v1.1.0 h1:OWmmG7XD1JyswK3S/3GG3Ok5lGdoHLKefLbAJ5K3u1k=
+github.com/johannessarpola/lutakkols/pkg/api v1.1.0/go.mod h1:lAsTukHxLkM2IYexD0E2T79oRSpvPLqd/B/rZsf3mrU=
 github.com/johannessarpola/go-lutakko/cli v1.0.0 h1:OrspEdMIAzxzCzfCDf0uZYGz40VgZuxiULb1EOF5NeY=
 github.com/johannessarpola/go-lutakko/cli v1.0.0/go.mod h1:kZTCmoejbNZSdCwdEKHxUGtBG2uLdDw9ZOVzW+juwkM=
 github.com/johannessarpola/go-pool v1.0.0 h1:ER5dXzyVmyBHaCXg/Jp4hT/CeyTD9ZR2k4id23liuVA=

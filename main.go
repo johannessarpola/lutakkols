@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/johannessarpola/go-lutakko-gigs/cmd"
+	"github.com/johannessarpola/lutakkols/cmd"
 )
 
 func main() {

@@ -3,11 +3,11 @@ package online
 
 import (
 	"errors"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/internal/caching"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/internal/fetch"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/models"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/options"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/logger"
+	"github.com/johannessarpola/lutakkols/pkg/api/internal/caching"
+	"github.com/johannessarpola/lutakkols/pkg/api/internal/fetch"
+	"github.com/johannessarpola/lutakkols/pkg/api/models"
+	"github.com/johannessarpola/lutakkols/pkg/api/options"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"time"
 )
 

@@ -2,9 +2,9 @@ package builder
 
 import (
 	"errors"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/internal/online"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/options"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/logger"
+	"github.com/johannessarpola/lutakkols/pkg/api/internal/online"
+	"github.com/johannessarpola/lutakkols/pkg/api/options"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 )
 
 type OnlineBuilder struct {

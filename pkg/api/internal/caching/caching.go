@@ -1,9 +1,9 @@
 package caching
 
 import (
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/internal/cache"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/models"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/logger"
+	"github.com/johannessarpola/lutakkols/pkg/api/internal/cache"
+	"github.com/johannessarpola/lutakkols/pkg/api/models"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"time"
 )
 

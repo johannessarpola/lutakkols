@@ -2,7 +2,7 @@ package cache
 
 import (
 	"fmt"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/logger"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/maypok86/otter"
 	"time"
 )

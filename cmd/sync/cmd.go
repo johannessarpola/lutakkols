@@ -2,9 +2,9 @@ package sync
 
 import (
 	"fmt"
-	"github.com/johannessarpola/go-lutakko-gigs/cmd/constants"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/provider"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/logger"
+	"github.com/johannessarpola/lutakkols/cmd/constants"
+	"github.com/johannessarpola/lutakkols/pkg/api/provider"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/spf13/cobra"
 	v "github.com/spf13/viper"
 	"path"
