@@ -1,0 +1,22 @@
+[
+  {
+    "id": "event1",
+    "headline": "Music Concert",
+    "event_link": "https://example.com/events/event1",
+    "image_link": "https://example.com/images/event1_small.jpg",
+    "week_day": "Friday",
+    "date": "2024-05-30",
+    "store_ink": "https://example.com/store/event1",
+    "in_stock": true
+  },
+  {
+    "id": "event2",
+    "headline": "Art Exhibition",
+    "event_link": "https://example.com/events/event2",
+    "image_link": "https://example.com/images/event2_small.jpg",
+    "week_day": "Saturday",
+    "date": "2024-06-01",
+    "store_ink": "https://example.com/store/event2",
+    "in_stock": false
+  }
+]

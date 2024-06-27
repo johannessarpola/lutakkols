@@ -1,0 +1,63 @@
+[
+  {
+    "event_id": "event1",
+    "summary": [
+      "A spectacular music concert featuring popular bands.",
+      "Enjoy an evening of great music and entertainment."
+    ],
+    "image_link": "https://example.com/images/event1_large.jpg",
+    "product_info": {
+      "venue": "City Arena",
+      "start_time": "19:00",
+      "duration": "3 hours"
+    },
+    "play_times": [
+      "19:00",
+      "21:00"
+    ],
+    "tickets": {
+      "tickets": [
+        {
+          "description": "General Admission",
+          "price": "$50"
+        },
+        {
+          "description": "VIP",
+          "price": "$100"
+        }
+      ]
+    },
+    "door_price": "$60"
+  },
+  {
+    "event_id": "event2",
+    "summary": [
+      "An inspiring art exhibition showcasing local artists.",
+      "Discover unique artworks and support the local art community."
+    ],
+    "image_link": "https://example.com/images/event2_large.jpg",
+    "product_info": {
+      "venue": "Art Gallery",
+      "start_time": "10:00",
+      "duration": "8 hours"
+    },
+    "play_times": [
+      "10:00",
+      "12:00",
+      "14:00"
+    ],
+    "tickets": {
+      "tickets": [
+        {
+          "description": "General Admission",
+          "price": "$20"
+        },
+        {
+          "description": "Student",
+          "price": "$10"
+        }
+      ]
+    },
+    "door_price": "$25"
+  }
+]
