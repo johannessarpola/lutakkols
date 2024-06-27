@@ -23,6 +23,29 @@ type Result[T any] struct {
 
 type AsyncSource struct{}
 
+func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
+	o1 := make(chan T)
+	o2 := make(chan T)
+	go func() {
+		defer close(o1)
+		defer close(o2)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case v, ok := <-in:
+				if !ok {
+					return
+				}
+				o1 <- v
+				o2 <- v
+			}
+		}
+	}()
+
+	return o1, o2
+}
+
 func FilterError[T any](resChan <-chan Result[T], onError func(err error), context context.Context) <-chan T {
 	out := make(chan T)
 	go func(onError func(err error)) {
