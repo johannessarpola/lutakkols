@@ -3,6 +3,7 @@ package sync2
 import (
 	"context"
 	"fmt"
+	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch"
 	"github.com/spf13/cobra"
 	v "github.com/spf13/viper"
@@ -36,7 +37,18 @@ var TestCmd = &cobra.Command{
 			fmt.Println("details error ", err)
 		}, ctx)
 
-		asciiResults := as.Images(details, ctx)
+		d1, d2 := fetch.FanOut(details, ctx)
+
+		go func(details <-chan *models.EventDetails) {
+			// write details
+			all, err := fetch.Collect(d2)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+		}(d2)
+
+		asciiResults := as.Images(d1, ctx)
 		ascii := fetch.FilterError(asciiResults, func(err error) {
 			fmt.Println("ascii error ", err)
 		}, ctx)

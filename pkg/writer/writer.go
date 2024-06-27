@@ -1,4 +1,4 @@
-package downloader
+package writer
 
 import (
 	"encoding/json"
@@ -6,8 +6,16 @@ import (
 	"os"
 )
 
-// writeJson general purpose func to write generic object to a file as json
-func writeJson(data interface{}, outFile string, opts ...options.WriteOpton) error {
+// WriteOption to handle output controls
+type WriteOption int
+
+const (
+	_ WriteOption = iota
+	PrettyPrint
+)
+
+// WriteJson general purpose func to write generic object to a file as json
+func WriteJson(data interface{}, outFile string, opts ...WriteOption) error {
 	// Open a file for writing
 	file, err := os.Create(outFile)
 	if err != nil {
