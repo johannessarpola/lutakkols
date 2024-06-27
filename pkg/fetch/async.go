@@ -25,8 +25,7 @@ type Result[T any] struct {
 
 type AsyncSource struct{}
 
-// Collect reads from the input channel and collects elements into a slice.
-// It respects the provided context for cancellation.
+// Collect reads from the input channel and collects elements into a slice, respecting context cancellation
 func Collect[T any](in <-chan T, ctx context.Context) ([]T, error) {
 	var result []T
 	for {
@@ -45,6 +44,7 @@ func Collect[T any](in <-chan T, ctx context.Context) ([]T, error) {
 	}
 }
 
+// FanOut fans a input channel out into two channels, respecting context cancellation
 func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
 	o1 := make(chan T)
 	o2 := make(chan T)
@@ -77,6 +77,7 @@ func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
 	return o1, o2
 }
 
+// FilterError filters errored Results from channel and calls onError for each, respecting context cancellation
 func FilterError[T any](resChan <-chan Result[*T], onError func(err error), context context.Context) <-chan T {
 	out := make(chan T)
 	go func(onError func(err error)) {
@@ -120,7 +121,6 @@ func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[
 			case <-context.Done():
 				return
 			default:
-				fmt.Printf("sending event %s\n", r.Val.Headline)
 				resChan <- r
 			}
 
@@ -147,7 +147,6 @@ func (a AsyncSource) Images(eds <-chan models.EventDetails, context context.Cont
 			case <-context.Done():
 				return
 			case ed, ok := <-eds:
-				fmt.Printf("fetching image from %s\n", ed.ImageURL())
 				if !ok {
 					return
 				}
@@ -180,17 +179,13 @@ func (a AsyncSource) Details(eps <-chan models.Event, ctx context.Context) <-cha
 				if !ok {
 					return
 				}
-				fmt.Printf("fetching details from %s\n", ep.EventURL())
 				v, err := EventDetails(ep.EventURL(), ep.ID())
-				fmt.Printf("sending details %s\n", ep.EventURL())
 				resChan <- Result[*models.EventDetails]{
 					Val: v,
 					Err: err,
 				}
-				fmt.Println("sent event details")
 			}
 		}
 	}()
-
 	return resChan
 }
