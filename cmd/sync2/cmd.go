@@ -3,7 +3,6 @@ package sync2
 import (
 	"context"
 	"fmt"
-	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch"
 	"github.com/spf13/cobra"
 	v "github.com/spf13/viper"
@@ -25,15 +24,22 @@ var TestCmd = &cobra.Command{
 		op := v.GetString("input_url")
 
 		as := fetch.AsyncSource{}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*300)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
 		defer cancel()
 		eventResults, errs := as.Events(op, ctx)
-		events := make(chan models.EventPartial)
+		events := fetch.FilterError(eventResults, func(err error) {
+			fmt.Println("event error ", err)
+		}, ctx)
 		detailResults := as.Details(events, ctx)
 
-		details := make(chan models.EventDetailsPartial)
-		asciiResults := as.Images(details, ctx)
+		details := fetch.FilterError(detailResults, func(err error) {
+			fmt.Println("details error ", err)
+		}, ctx)
 
+		asciiResults := as.Images(details, ctx)
+		ascii := fetch.FilterError(asciiResults, func(err error) {
+			fmt.Println("ascii error ", err)
+		}, ctx)
 		for {
 			select {
 			case <-ctx.Done():
@@ -42,27 +48,8 @@ var TestCmd = &cobra.Command{
 			case err := <-errs:
 				fmt.Println("main loop - error:", err)
 				return
-			case e := <-eventResults:
-				if e.Err == nil {
-					fmt.Printf("forwarding event %s\n", e.Val.ID())
-					events <- e.Val
-				} else {
-					fmt.Println("main loop - event err", e.Err)
-				}
-			case d := <-detailResults:
-				if d.Err == nil {
-					fmt.Printf("forwarding details %s\n", d.Val.EventID)
-					details <- d.Val
-				} else {
-					fmt.Println("main loop - details err", d.Err)
-				}
-			case a := <-asciiResults:
-				if a.Err == nil {
-					fmt.Printf("got ascii for %s\n", a.Val.EventID)
-					fmt.Println(a.Val)
-				} else {
-					fmt.Println("main loop - ascii err", a.Err)
-				}
+			case a := <-ascii:
+				fmt.Printf("main loop - got ascii %s\n", a.Ascii)
 			}
 
 		}

@@ -23,6 +23,26 @@ type Result[T any] struct {
 
 type AsyncSource struct{}
 
+func FilterError[T any](resChan <-chan Result[T], onError func(err error), context context.Context) <-chan T {
+	out := make(chan T)
+	go func(onError func(err error)) {
+		defer close(out)
+		for {
+			select {
+			case <-context.Done():
+				return
+			case res, ok := <-resChan:
+				if !ok {
+					return
+				}
+				out <- res.Val
+			}
+		}
+	}(onError)
+
+	return out
+}
+
 func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[*models.Event], <-chan error) {
 	resChan := make(chan Result[*models.Event])
 	errChn := make(chan error, 1)
@@ -62,7 +82,7 @@ func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[
 	return resChan, errChn
 }
 
-func (a AsyncSource) Images(eds <-chan models.EventDetailsPartial, context context.Context) <-chan Result[*models.EventAscii] {
+func (a AsyncSource) Images(eds <-chan *models.EventDetails, context context.Context) <-chan Result[*models.EventAscii] {
 	resChan := make(chan Result[*models.EventAscii])
 
 	go func() {
@@ -75,6 +95,10 @@ func (a AsyncSource) Images(eds <-chan models.EventDetailsPartial, context conte
 				fmt.Printf("fetching image from %s\n", ed.ImageURL())
 				if !ok {
 					return
+				}
+				// TODO There's better way for this, so fix later
+				if ed == nil {
+					continue
 				}
 				v, err := EventImage(ed.ImageURL())
 				resChan <- Result[*models.EventAscii]{
@@ -92,7 +116,7 @@ func (a AsyncSource) Images(eds <-chan models.EventDetailsPartial, context conte
 	return resChan
 }
 
-func (a AsyncSource) Details(eps <-chan models.EventPartial, ctx context.Context) <-chan Result[*models.EventDetails] {
+func (a AsyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-chan Result[*models.EventDetails] {
 	resChn := make(chan Result[*models.EventDetails])
 	go func() {
 		defer close(resChn)
@@ -104,6 +128,10 @@ func (a AsyncSource) Details(eps <-chan models.EventPartial, ctx context.Context
 			case ep, ok := <-eps:
 				if !ok {
 					return
+				}
+				// TODO There's better way for this, so fix later
+				if ep == nil {
+					continue
 				}
 				fmt.Printf("fetching details from %s\n", ep.EventURL())
 				v, err := EventDetails(ep.EventURL(), ep.ID())
