@@ -1,5 +1,5 @@
 // Package pool contains a simple threadpool to use to queue work concurrently and then aggregate the resultQueue into a single result
-package pool
+package workset
 
 import (
 	"errors"

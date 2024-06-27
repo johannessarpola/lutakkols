@@ -7,7 +7,7 @@ import (
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/api/options"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
-	"github.com/johannessarpola/lutakkols/pkg/pool"
+	"github.com/johannessarpola/lutakkols/pkg/workset"
 	"time"
 )
 
@@ -109,7 +109,7 @@ func downloadDetails(events []models.Event, outPath string, concurrentSize int) 
 		rs []*models.EventDetails
 	)
 
-	var jobs []pool.Task[*models.EventDetails]
+	var jobs []workset.Task[*models.EventDetails]
 	for _, event := range events {
 		detailsFetch := func() (*models.EventDetails, error) {
 			e := event // capture variable
@@ -125,7 +125,7 @@ func downloadDetails(events []models.Event, outPath string, concurrentSize int) 
 	}
 
 	timeout := time.Second * 10
-	ws := pool.NewWorkSet(jobs, concurrentSize, timeout)
+	ws := workset.NewWorkSet(jobs, concurrentSize, timeout)
 	for _, result := range ws.Collect() {
 		if result.Value != nil {
 			rs = append(rs, result.Value)
