@@ -29,11 +29,12 @@ var TestCmd = &cobra.Command{
 		logger.SetLogger(&logger.StdOutLogger{})
 
 		op := v.GetString("input_url")
-		defaultTimeout := time.Second * 30
+		defaultTimeout := time.Second * 120
 		as := fetch.AsyncSource{}
 		ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 		defer cancel()
-		eventResults, errs := as.Events(op, ctx)
+
+		eventResults, errs := as.Events(op, time.Second*1, ctx)
 		events := fetch.FilterError(eventResults, func(err error) {
 			fmt.Println("event error ", err)
 		}, ctx)

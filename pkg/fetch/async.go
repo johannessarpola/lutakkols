@@ -2,7 +2,6 @@ package fetch
 
 import (
 	"context"
-	"fmt"
 	"github.com/gocolly/colly/v2"
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch/selectors"
@@ -98,8 +97,10 @@ func FilterError[T any](resChan <-chan Result[*T], onError func(err error), cont
 	return out
 }
 
-// TODO need to add configurable ratelimit
-func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[*models.Event], <-chan error) {
+// Events loads the events and has a rate limiting functionality for the output channel
+func (a AsyncSource) Events(url string, waitTime time.Duration, context context.Context) (<-chan Result[*models.Event], <-chan error) {
+	rateLimit := time.NewTicker(waitTime)
+
 	resChan := make(chan Result[*models.Event])
 	errChan := make(chan error, 1)
 
@@ -111,6 +112,7 @@ func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[
 		var ord atomic.Int32
 		ord.Store(0)
 		c.OnHTML(selectors.Events, func(e *colly.HTMLElement) {
+			n := time.Now()
 			evt := handleEvent(&ord, e)
 			r := Result[*models.Event]{
 				Val: &evt,
@@ -120,16 +122,15 @@ func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[
 			select {
 			case <-context.Done():
 				return
-			default:
+			case <-rateLimit.C:
+				logger.Log.Debugf("Tick delay %s", time.Now().Sub(n))
 				resChan <- r
 			}
 
 		})
 
-		fmt.Println("visiting ", url)
 		e := c.Visit(url)
 		if e != nil {
-			fmt.Println("error ", e)
 			errChan <- e
 			return
 		}
