@@ -2,11 +2,11 @@ package cmd
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/johannessarpola/go-lutakko-gigs/internal/views/messages"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/models"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/options"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/provider"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/logger"
+	"github.com/johannessarpola/lutakkols/internal/views/messages"
+	"github.com/johannessarpola/lutakkols/pkg/api/models"
+	"github.com/johannessarpola/lutakkols/pkg/api/options"
+	"github.com/johannessarpola/lutakkols/pkg/api/provider"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 )
 
 func GetDetails(eventID string, eventURL string, provider provider.Provider, opts ...options.ProviderOption) tea.Cmd {

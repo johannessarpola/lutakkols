@@ -1,7 +1,7 @@
 package views
 
 import (
-	"github.com/johannessarpola/go-lutakko-gigs/internal/views/spinner"
+	"github.com/johannessarpola/lutakkols/internal/views/spinner"
 	"time"
 )
 

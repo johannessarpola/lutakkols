@@ -1,7 +1,7 @@
 package views
 
 import (
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/models"
+	"github.com/johannessarpola/lutakkols/pkg/api/models"
 )
 
 type EventViewListItem struct {

@@ -2,7 +2,7 @@ package views
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/johannessarpola/go-lutakko-gigs/internal/views/constants"
+	"github.com/johannessarpola/lutakkols/internal/views/constants"
 )
 
 const defaultWidth = 100 // parameter?

@@ -5,8 +5,8 @@ package fetch
 import (
 	"bytes"
 	"github.com/gocolly/colly/v2"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/internal/fetch/selectors"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/models"
+	"github.com/johannessarpola/lutakkols/pkg/api/internal/fetch/selectors"
+	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/qeesung/image2ascii/convert"
 	"image"
 	"io"

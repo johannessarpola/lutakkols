@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/gob"
 	"encoding/hex"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/api/models"
+	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"reflect"
 )
 

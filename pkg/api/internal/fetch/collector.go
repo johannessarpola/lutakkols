@@ -2,7 +2,7 @@ package fetch
 
 import (
 	"github.com/gocolly/colly/v2"
-	"github.com/johannessarpola/go-lutakko-gigs/pkg/logger"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 )
 
 const UserAgent = "Lutakko CLI (beta)"

@@ -1,4 +1,4 @@
-module github.com/johannessarpola/go-lutakko-gigs
+module github.com/johannessarpola/lutakkols
 go 1.22.0
 
 require (
