@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/johannessarpola/lutakkols/pkg/writer"
 	"github.com/spf13/cobra"
 	v "github.com/spf13/viper"
@@ -24,6 +25,9 @@ var TestCmd = &cobra.Command{
 	Short: "Syncs data",
 	Long:  "Syncs data",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		logger.SetLogger(&logger.StdOutLogger{})
+
 		op := v.GetString("input_url")
 		defaultTimeout := time.Second * 8
 		as := fetch.AsyncSource{}

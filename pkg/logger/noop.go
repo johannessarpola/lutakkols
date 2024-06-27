@@ -10,8 +10,6 @@ func (l *noopLogger) Infof(_ string, _ ...interface{}) {}
 
 func (l *noopLogger) Info(_ ...interface{}) {}
 
-func (l *noopLogger) Print(_ ...interface{}) {}
-
 func (l *noopLogger) Errorf(_ string, _ ...interface{}) {}
 
 func (l *noopLogger) Error(_ ...interface{}) {}
