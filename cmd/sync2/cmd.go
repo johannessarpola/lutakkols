@@ -24,7 +24,7 @@ var TestCmd = &cobra.Command{
 		op := v.GetString("input_url")
 
 		as := fetch.AsyncSource{}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
 		eventResults, errs := as.Events(op, ctx)
 		events := fetch.FilterError(eventResults, func(err error) {

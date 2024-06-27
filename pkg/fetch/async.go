@@ -45,11 +45,11 @@ func FilterError[T any](resChan <-chan Result[T], onError func(err error), conte
 
 func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[*models.Event], <-chan error) {
 	resChan := make(chan Result[*models.Event])
-	errChn := make(chan error, 1)
+	errChan := make(chan error, 1)
 
 	go func() {
 		defer close(resChan)
-		defer close(errChn)
+		defer close(errChan)
 		c := newCollector()
 
 		var ord atomic.Int32
@@ -75,11 +75,11 @@ func (a AsyncSource) Events(url string, context context.Context) (<-chan Result[
 		e := c.Visit(url)
 		if e != nil {
 			fmt.Println("error ", e)
-			errChn <- e
+			errChan <- e
 			return
 		}
 	}()
-	return resChan, errChn
+	return resChan, errChan
 }
 
 func (a AsyncSource) Images(eds <-chan *models.EventDetails, context context.Context) <-chan Result[*models.EventAscii] {
@@ -117,9 +117,9 @@ func (a AsyncSource) Images(eds <-chan *models.EventDetails, context context.Con
 }
 
 func (a AsyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-chan Result[*models.EventDetails] {
-	resChn := make(chan Result[*models.EventDetails])
+	resChan := make(chan Result[*models.EventDetails])
 	go func() {
-		defer close(resChn)
+		defer close(resChan)
 
 		for {
 			select {
@@ -136,7 +136,7 @@ func (a AsyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-ch
 				fmt.Printf("fetching details from %s\n", ep.EventURL())
 				v, err := EventDetails(ep.EventURL(), ep.ID())
 				fmt.Printf("sending details %s\n", ep.EventURL())
-				resChn <- Result[*models.EventDetails]{
+				resChan <- Result[*models.EventDetails]{
 					Val: v,
 					Err: err,
 				}
@@ -145,5 +145,5 @@ func (a AsyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-ch
 		}
 	}()
 
-	return resChn
+	return resChan
 }
