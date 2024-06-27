@@ -5,8 +5,8 @@ package fetch
 import (
 	"bytes"
 	"github.com/gocolly/colly/v2"
-	"github.com/johannessarpola/lutakkols/pkg/api/internal/fetch/selectors"
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
+	"github.com/johannessarpola/lutakkols/pkg/fetch/selectors"
 	"github.com/qeesung/image2ascii/convert"
 	"image"
 	"io"
@@ -24,7 +24,13 @@ func EventImage(url string) (string, error) {
 
 	converter := convert.NewImageConverter()
 	return converter.Image2ASCIIString(*img, defaultConvertorOptions()), nil
+}
 
+func handleEvent(ord *atomic.Int32, e *colly.HTMLElement) models.Event {
+	evt := extractEvent(e)
+	evt.UpdatedAt = time.Now()
+	evt.Order = ord.Add(1)
+	return evt
 }
 
 // Events fetches the events from the source

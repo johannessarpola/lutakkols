@@ -4,9 +4,9 @@ package online
 import (
 	"errors"
 	"github.com/johannessarpola/lutakkols/pkg/api/internal/caching"
-	"github.com/johannessarpola/lutakkols/pkg/api/internal/fetch"
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/api/options"
+	"github.com/johannessarpola/lutakkols/pkg/fetch"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"time"
 )
