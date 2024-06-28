@@ -11,6 +11,15 @@ type Result[T any] struct {
 	Err error
 }
 
+// Pour consumes a channel, collects them into array and calls the sink func with it, respecting context cancellation
+func Pour[T any](in <-chan T, sink func([]T) error, ctx context.Context) error {
+	collect, err := Collect(in, ctx)
+	if err != nil {
+		return err
+	}
+	return sink(collect)
+}
+
 // Materialize copies the pointer values into another channel as a concrete type, respecting context cancellation
 func Materialize[T any](in <-chan *T, context context.Context) <-chan T {
 	out := make(chan T)

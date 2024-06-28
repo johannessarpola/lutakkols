@@ -3,7 +3,6 @@ package sync2
 import (
 	"context"
 	"fmt"
-	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/johannessarpola/lutakkols/pkg/pipes"
@@ -37,54 +36,40 @@ var TestCmd = &cobra.Command{
 
 		eventResults := as.Events(op, time.Second*1, ctx)
 		events := pipes.FilterError(eventResults, func(err error) {
-			fmt.Println("event error ", err)
+			logger.Log.Error("event error ", err)
 		}, ctx)
 		e1, e2 := pipes.FanOut(events, ctx)
 
 		var wg sync.WaitGroup
-		wg.Add(2) // add two for each output (file)
 
-		go func(events <-chan models.Event) {
-			// write events
-			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
-			defer cancel()
-			all, err := pipes.Collect(events, subCtx)
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			err = writer.WriteJson(all, ".data/evts.json", writer.PrettyPrint)
-			if err != nil {
-				fmt.Println(err)
-			}
-			wg.Done()
-		}(pipes.Materialize(e2, ctx))
+		wg.Add(1)
+		wr1 := writer.WriteChannel(pipes.Materialize(e2, ctx), ".data/events.json", defaultTimeout)
 
 		detailResults := as.Details(e1, ctx)
-
 		details := pipes.FilterError(detailResults, func(err error) {
-			fmt.Println("details error ", err)
+			logger.Log.Warn("details error ", err)
 		}, ctx)
 
-		//d1, d2 := fetch.FanOut(details, ctx)
+		wg.Add(1)
+		wr2 := writer.WriteChannel(pipes.Materialize(details, ctx), ".data/event_details.json", defaultTimeout)
 
-		go func(details <-chan models.EventDetails) {
-			// write details
-			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
-			defer cancel()
-
-			all, err := pipes.Collect(details, subCtx)
-			if err != nil {
-				fmt.Println(err)
+	main:
+		for {
+			select {
+			case r1 := <-wr1:
+				if r1.Err != nil {
+					logger.Log.Error("could not write events", r1.Err)
+				}
+				wg.Done()
+				break main
+			case r2 := <-wr2:
+				if r2.Err != nil {
+					logger.Log.Error("could not write details", r2.Err)
+				}
+				wg.Done()
+				break main
 			}
-
-			err = writer.WriteJson(all, ".data/dtls.json", writer.PrettyPrint)
-			if err != nil {
-				fmt.Println(err)
-			}
-			wg.Done()
-		}(pipes.Materialize(details, ctx))
-
+		}
 		wg.Wait()
 
 	},

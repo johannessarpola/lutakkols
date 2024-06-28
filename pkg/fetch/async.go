@@ -37,7 +37,7 @@ func (a AsyncSource) Events(url string, waitTime time.Duration, context context.
 			case <-context.Done():
 				return
 			case <-rateLimit.C:
-				logger.Log.Debugf("Tick delay %s", time.Now().Sub(n))
+				logger.Log.Debugf("Tick delay %d ms", time.Now().Sub(n).Milliseconds())
 				resChan <- r
 			}
 

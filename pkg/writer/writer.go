@@ -1,9 +1,13 @@
 package writer
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/johannessarpola/lutakkols/pkg/api/options"
+	"github.com/johannessarpola/lutakkols/pkg/logger"
+	"github.com/johannessarpola/lutakkols/pkg/pipes"
 	"os"
+	"time"
 )
 
 // WriteOption to handle output controls
@@ -13,6 +17,31 @@ const (
 	_ WriteOption = iota
 	PrettyPrint
 )
+
+func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) <-chan pipes.Result[bool] {
+	resultChan := make(chan pipes.Result[bool], 1)
+	go func() {
+		consumeCtx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer func() {
+			close(resultChan)
+			cancel()
+		}()
+
+		err := pipes.Pour(chn, func(elements []T) error {
+			return WriteJson(elements, filename, PrettyPrint)
+		}, consumeCtx)
+
+		if err != nil {
+			logger.Log.Error("write error", err)
+		}
+		resultChan <- pipes.Result[bool]{
+			Val: err == nil,
+			Err: err,
+		}
+	}()
+
+	return resultChan
+}
 
 // WriteJson general purpose func to write generic object to a file as json
 func WriteJson(data interface{}, outFile string, opts ...WriteOption) error {
