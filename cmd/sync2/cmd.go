@@ -42,9 +42,9 @@ var TestCmd = &cobra.Command{
 		e1, e2 := pipes.FanOut(events, ctx)
 
 		var wg sync.WaitGroup
+		wg.Add(2) // add two for each output (file)
 
 		go func(events <-chan models.Event) {
-			wg.Add(1)
 			// write events
 			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 			defer cancel()
@@ -69,7 +69,6 @@ var TestCmd = &cobra.Command{
 		//d1, d2 := fetch.FanOut(details, ctx)
 
 		go func(details <-chan models.EventDetails) {
-			wg.Add(1)
 			// write details
 			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 			defer cancel()
@@ -86,22 +85,6 @@ var TestCmd = &cobra.Command{
 			wg.Done()
 		}(pipes.Materialize(details, ctx))
 
-		//asciiResults := as.Images(d1, ctx)
-		//ascii := fetch.FilterError(asciiResults, func(err error) {
-		//	fmt.Println("ascii error ", err)
-		//}, ctx)
-
-	consume:
-		for {
-			select {
-			case <-ctx.Done():
-				fmt.Println("context done")
-				break consume
-				//case a := <-ascii:
-				//	fmt.Printf("main loop - got ascii %s\n", a.EventID)
-			}
-
-		}
 		wg.Wait()
 
 	},
