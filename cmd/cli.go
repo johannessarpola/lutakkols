@@ -27,6 +27,14 @@ var rootCmd = &cobra.Command{
 	Use:   "ui",
 	Short: "View Lutakko gigs with CLI",
 	Long:  "View Lutakko gigs with CLI",
+	// For children
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// Bind the verbose flag to viper
+		err := v.BindPFlag("verbose", cmd.Flags().Lookup("verbose"))
+		if err != nil {
+			fmt.Printf("could not bind flag: %v\n", err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if v.GetBool("offline") {
@@ -84,7 +92,8 @@ func init() {
 	rootCmd.Flags().StringVarP(&Config.Address, "address", "a", "https://www.jelmu.net", "Server address")
 	rootCmd.Flags().BoolVarP(&Config.Offline, "offline", "o", false, "Run in offline mode")
 	rootCmd.Flags().StringVarP(&Config.LogFile, "logfile", "l", "debug.log", "File to write log into")
-	rootCmd.Flags().BoolVarP(&Config.Verbose, "verbose", "v", false, "Verbose")
+	// Inherited for all
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose")
 
 	err := v.BindPFlag("address", rootCmd.Flags().Lookup("address"))
 	if err != nil {
@@ -96,11 +105,6 @@ func init() {
 	}
 
 	err = v.BindPFlag("logfile", rootCmd.Flags().Lookup("logfile"))
-	if err != nil {
-		fmt.Printf("could not bind flag: %v\n", err)
-	}
-
-	err = v.BindPFlag("verbose", rootCmd.Flags().Lookup("verbose"))
 	if err != nil {
 		fmt.Printf("could not bind flag: %v\n", err)
 	}
