@@ -6,6 +6,7 @@ import (
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
+	pipes2 "github.com/johannessarpola/lutakkols/pkg/pipes"
 	"github.com/johannessarpola/lutakkols/pkg/writer"
 	"github.com/spf13/cobra"
 	v "github.com/spf13/viper"
@@ -35,10 +36,10 @@ var TestCmd = &cobra.Command{
 		defer cancel()
 
 		eventResults, errs := as.Events(op, time.Second*1, ctx)
-		events := fetch.FilterError(eventResults, func(err error) {
+		events := pipes2.FilterError(eventResults, func(err error) {
 			fmt.Println("event error ", err)
 		}, ctx)
-		e1, e2 := fetch.FanOut(events, ctx)
+		e1, e2 := pipes2.FanOut(events, ctx)
 
 		var wg sync.WaitGroup
 
@@ -47,7 +48,7 @@ var TestCmd = &cobra.Command{
 			// write events
 			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 			defer cancel()
-			all, err := fetch.Collect(events, subCtx)
+			all, err := pipes2.Collect(events, subCtx)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -61,7 +62,7 @@ var TestCmd = &cobra.Command{
 
 		detailResults := as.Details(e1, ctx)
 
-		details := fetch.FilterError(detailResults, func(err error) {
+		details := pipes2.FilterError(detailResults, func(err error) {
 			fmt.Println("details error ", err)
 		}, ctx)
 
@@ -73,7 +74,7 @@ var TestCmd = &cobra.Command{
 			subCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 			defer cancel()
 
-			all, err := fetch.Collect(details, subCtx)
+			all, err := pipes2.Collect(details, subCtx)
 			if err != nil {
 				fmt.Println(err)
 			}
