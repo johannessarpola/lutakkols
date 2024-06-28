@@ -1,3 +1,4 @@
+// Package pipes contains bunch of FP styled functions for channels
 package pipes
 
 import (
@@ -7,6 +8,7 @@ import (
 	"reflect"
 )
 
+// Result is a struct to wrap either a element or a error
 type Result[T any] struct {
 	Val T
 	Err error
