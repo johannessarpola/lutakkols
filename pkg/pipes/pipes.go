@@ -15,12 +15,14 @@ type Result[T any] struct {
 }
 
 // Pour consumes a channel, collects them into array and calls the sink func with it, respecting context cancellation
-func Pour[T any](in <-chan T, sink func([]T) error, ctx context.Context) error {
+func Pour[T any](head T, in <-chan T, sink func([]T) error, ctx context.Context) error {
+	var h []T = []T{head}
+
 	collect, err := Collect(in, ctx)
 	if err != nil {
 		return err
 	}
-	return sink(collect)
+	return sink(append(h, collect...))
 }
 
 // Map transforms elements in channel to another type

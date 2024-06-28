@@ -10,7 +10,6 @@ import (
 	"github.com/johannessarpola/lutakkols/pkg/writer"
 	"github.com/spf13/cobra"
 	v "github.com/spf13/viper"
-	"os"
 	"path"
 	"time"
 )
@@ -56,11 +55,14 @@ func Run(conf RunConfig) {
 	detailsWriteChan := writer.WriteChannel(pipes.Materialize(details, ctx), conf.EventDetailsFn, timeout)
 
 	var dwr1, dwr2 bool
+
+	//	writeCtx, cancel := context.WithTimeout(context.Background(), timeout)
 	for {
 		select {
-		case <-ctx.Done():
-			logger.Log.Error("Context timeout exceeded")
-			os.Exit(1)
+		// We want wait to write into the file from channel, should time out?
+		//		case <-writeCtx.Done():
+		//			logger.Log.Error("Context timeout exceeded")
+		//			os.Exit(1)
 		case eventWrite := <-eventWriteChan:
 			if eventWrite.Err != nil {
 				logger.Log.Error("Could not write events", eventWrite.Err)

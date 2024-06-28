@@ -3,6 +3,7 @@ package writer
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/johannessarpola/lutakkols/pkg/api/options"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/johannessarpola/lutakkols/pkg/pipes"
@@ -23,15 +24,29 @@ const (
 func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) <-chan pipes.Result[bool] {
 	resultChan := make(chan pipes.Result[bool], 1)
 	go func() {
-		consumeCtx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer func() {
-			close(resultChan)
-			cancel()
-		}()
+		defer close(resultChan)
 
-		err := pipes.Pour(chn, func(elements []T) error {
+		var head T
+	initialWait:
+		for {
+			select {
+			case <-time.After(timeout):
+				// we will first wait for first messages for timeout
+				logger.Log.Errorf("timeout after %v", timeout)
+				return
+			case head = <-chn:
+				// we receive first messages before timeout, continue
+				fmt.Println("!!!!!!!!!!!!!! Received message")
+				break initialWait
+			}
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+
+		err := pipes.Pour(head, chn, func(elements []T) error {
 			return WriteJson(elements, filename, PrettyPrint)
-		}, consumeCtx)
+		}, ctx)
 
 		if err != nil {
 			logger.Log.Error("write error", err)
