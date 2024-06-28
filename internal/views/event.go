@@ -167,7 +167,7 @@ func (m EventViev) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "g", "right":
 			err := browser.Open(m.eventLink)
 			if err != nil {
-				logger.Log.Errorf("Error opening browser: %s", err.Error())
+				logger.Log.Errorf("Err opening browser: %s", err.Error())
 			}
 		case "r", "f5":
 			if m.DataUpdated.Before(time.Now().Add(-30 * time.Second)) {

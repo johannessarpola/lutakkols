@@ -34,7 +34,7 @@ func New(eventsSourceURL string, opts ...options.ProviderOption) Provider {
 	c, err := caching.New(ttlOptions)
 	if err != nil {
 		// we can operate without cache
-		logger.Log.Warnf("Error initializing cache: %v", err)
+		logger.Log.Warnf("Err initializing cache: %v", err)
 	}
 
 	return Provider{

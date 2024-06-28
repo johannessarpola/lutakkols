@@ -25,11 +25,11 @@ func TestCreateEventID(t *testing.T) {
 
 	aId, err := createEventID(a)
 	if err != nil {
-		t.Errorf("Error creating event ID: %s", err)
+		t.Errorf("Err creating event ID: %s", err)
 	}
 	bId, err := createEventID(b)
 	if err != nil {
-		t.Errorf("Error creating event ID: %s", err)
+		t.Errorf("Err creating event ID: %s", err)
 	}
 
 	if aId != bId {
@@ -41,7 +41,7 @@ func TestCreateEventID(t *testing.T) {
 	c.Headline = "new headline"
 	cId, err := createEventID(c)
 	if err != nil {
-		t.Errorf("Error creating event ID: %s", err)
+		t.Errorf("Err creating event ID: %s", err)
 	}
 
 	if aId == cId {

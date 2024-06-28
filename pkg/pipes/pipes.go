@@ -6,9 +6,29 @@ import (
 	"reflect"
 )
 
-type Result[T any] interface {
-	error
-	Value() T
+type Result[T any] struct {
+	Val T
+	Err error
+}
+
+// Materialize copies the pointer values into another channel as a concrete type, respecting context cancellation
+func Materialize[T any](in <-chan *T, context context.Context) <-chan T {
+	out := make(chan T)
+	go func(in <-chan *T) {
+		defer close(out)
+		for {
+			select {
+			case <-context.Done():
+				return
+			case value, ok := <-in:
+				if !ok {
+					return
+				}
+				out <- *value
+			}
+		}
+	}(in)
+	return out
 }
 
 // Collect reads from the input channel and collects elements into a slice, respecting context cancellation
@@ -64,7 +84,7 @@ func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
 }
 
 // FilterError filters errored Results from channel and calls onError for each, respecting context cancellation
-func FilterError[T any](resChan <-chan Result[*T], onError func(err error), context context.Context) <-chan T {
+func FilterError[T any](resChan <-chan Result[T], onError func(err error), context context.Context) <-chan T {
 	out := make(chan T)
 	go func(onError func(err error)) {
 		defer close(out)
@@ -76,7 +96,10 @@ func FilterError[T any](resChan <-chan Result[*T], onError func(err error), cont
 				if !ok {
 					return
 				}
-				out <- *res.Val
+				if res.Err != nil {
+					onError(res.Err)
+				}
+				out <- res.Val
 			}
 		}
 	}(onError)

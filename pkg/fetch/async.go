@@ -6,41 +6,21 @@ import (
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch/selectors"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
+	"github.com/johannessarpola/lutakkols/pkg/pipes"
 	"sync/atomic"
 	"time"
 )
 
-type Source interface {
-	Events(url string) (<-chan Result[*models.Event], <-chan error)
-	Images(eds <-chan models.EventDetailsPartial) <-chan Result[*models.EventAscii]
-	Details(eps <-chan models.EventPartial) <-chan Result[*models.EventDetails]
-}
-
-type Result[T any] struct {
-	Val T
-	Err error
-}
-
-func (r Result[T]) Value() T {
-	return r.Val
-}
-
-func (r Result[T]) Error() string {
-	return r.Err.Error()
-}
-
 type AsyncSource struct{}
 
-// Events loads the events and has a rate limiting functionality for the output channel
-func (a AsyncSource) Events(url string, waitTime time.Duration, context context.Context) (<-chan Result[*models.Event], <-chan error) {
+// Events loads the events and has a rate limiting functionality for the output channel, respecting context
+// pointers are used so that there's no copying by value
+func (a AsyncSource) Events(url string, waitTime time.Duration, context context.Context) <-chan pipes.Result[*models.Event] {
 	rateLimit := time.NewTicker(waitTime)
-
-	resChan := make(chan Result[*models.Event])
-	errChan := make(chan error, 1)
+	resChan := make(chan pipes.Result[*models.Event])
 
 	go func() {
 		defer close(resChan)
-		defer close(errChan)
 		c := newCollector()
 
 		var ord atomic.Int32
@@ -48,7 +28,7 @@ func (a AsyncSource) Events(url string, waitTime time.Duration, context context.
 		c.OnHTML(selectors.Events, func(e *colly.HTMLElement) {
 			n := time.Now()
 			evt := handleEvent(&ord, e)
-			r := Result[*models.Event]{
+			r := pipes.Result[*models.Event]{
 				Val: &evt,
 				Err: nil,
 			}
@@ -65,15 +45,21 @@ func (a AsyncSource) Events(url string, waitTime time.Duration, context context.
 
 		e := c.Visit(url)
 		if e != nil {
-			errChan <- e
+			r := pipes.Result[*models.Event]{
+				Val: nil,
+				Err: e,
+			}
+			resChan <- r
 			return
 		}
 	}()
-	return resChan, errChan
+	return resChan
 }
 
-func (a AsyncSource) Images(eds <-chan models.EventDetails, context context.Context) <-chan Result[*models.EventAscii] {
-	resChan := make(chan Result[*models.EventAscii])
+// Images gets a channel of ascii images for event details, respecting context
+// pointers are used so that there's no copying by value
+func (a AsyncSource) Images(eds <-chan models.EventDetails, context context.Context) <-chan pipes.Result[*models.EventAscii] {
+	resChan := make(chan pipes.Result[*models.EventAscii])
 
 	go func() {
 		defer close(resChan)
@@ -86,7 +72,7 @@ func (a AsyncSource) Images(eds <-chan models.EventDetails, context context.Cont
 					return
 				}
 				v, err := EventImage(ed.ImageURL())
-				resChan <- Result[*models.EventAscii]{
+				resChan <- pipes.Result[*models.EventAscii]{
 					Val: &models.EventAscii{
 						Ascii:     v,
 						EventID:   ed.ID(),
@@ -101,8 +87,10 @@ func (a AsyncSource) Images(eds <-chan models.EventDetails, context context.Cont
 	return resChan
 }
 
-func (a AsyncSource) Details(eps <-chan models.Event, ctx context.Context) <-chan Result[*models.EventDetails] {
-	resChan := make(chan Result[*models.EventDetails])
+// Details gets a channel of event details for a event stream, respecting context
+// pointers are used so that there's no copying by value
+func (a AsyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-chan pipes.Result[*models.EventDetails] {
+	resChan := make(chan pipes.Result[*models.EventDetails])
 	go func() {
 		defer close(resChan)
 
@@ -115,7 +103,7 @@ func (a AsyncSource) Details(eps <-chan models.Event, ctx context.Context) <-cha
 					return
 				}
 				v, err := EventDetails(ep.EventURL(), ep.ID())
-				resChan <- Result[*models.EventDetails]{
+				resChan <- pipes.Result[*models.EventDetails]{
 					Val: v,
 					Err: err,
 				}
