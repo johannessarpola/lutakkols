@@ -2,6 +2,7 @@ package pipes
 
 import (
 	"context"
+	"fmt"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"reflect"
 )
@@ -18,6 +19,38 @@ func Pour[T any](in <-chan T, sink func([]T) error, ctx context.Context) error {
 		return err
 	}
 	return sink(collect)
+}
+
+// Map transforms elements in channel to another type
+func Map[T any, O any](in <-chan T, fn func(T) (O, error), context context.Context) <-chan Result[O] {
+	out := make(chan Result[O])
+	go func() {
+		defer close(out)
+		for {
+			select {
+			case <-context.Done():
+				return
+			case value, ok := <-in:
+				if !ok {
+					return
+				}
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							out <- Result[O]{Err: fmt.Errorf("panic in transformation: %v", r)}
+						}
+					}()
+					t, err := fn(value)
+					select {
+					case out <- Result[O]{Val: t, Err: err}:
+					case <-context.Done():
+						return
+					}
+				}()
+			}
+		}
+	}()
+	return out
 }
 
 // Materialize copies the pointer values into another channel as a concrete type, respecting context cancellation
