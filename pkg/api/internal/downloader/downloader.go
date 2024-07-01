@@ -3,11 +3,12 @@ package downloader
 
 import (
 	"errors"
-	"github.com/johannessarpola/lutakkols/pkg/api/internal/fetch"
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/api/options"
+	"github.com/johannessarpola/lutakkols/pkg/fetch"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/johannessarpola/lutakkols/pkg/workset"
+	"github.com/johannessarpola/lutakkols/pkg/writer"
 	"time"
 )
 
@@ -94,7 +95,7 @@ func downloadEvents(sourceURL string, outPath string) ([]models.Event, error) {
 		return nil, err
 	}
 
-	err = writeJson(events, outPath, options.PrettyPrint)
+	err = writer.WriteJson(events, outPath, writer.PrettyPrint)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func downloadDetails(events []models.Event, outPath string, concurrentSize int) 
 			logger.Log.Errorf("could not fetch event details %s", result.Error)
 		}
 	}
-	err := writeJson(rs, outPath, options.PrettyPrint)
+	err := writer.WriteJson(rs, outPath, writer.PrettyPrint)
 	if err != nil {
 		return err
 	}
