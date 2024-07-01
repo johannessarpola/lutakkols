@@ -3,6 +3,7 @@ package pipes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"sync"
@@ -132,4 +133,43 @@ func TestCollect(t *testing.T) {
 	if len(col) != l {
 		t.Errorf("got %d, want %d", len(col), l)
 	}
+}
+
+func TestFilter(t *testing.T) {
+	l := 10
+	errs := 2
+	ch := make(chan Result[int])
+
+	go func() {
+		ch <- Result[int]{
+			Err: errors.New("error 1"),
+		}
+
+		for i := 0; i < l; i++ {
+			ch <- Result[int]{
+				Val: 1,
+				Err: nil,
+			}
+		}
+
+		ch <- Result[int]{
+			Err: errors.New("error 2"),
+		}
+		defer close(ch)
+	}()
+
+	calls := 0
+	f := FilterError(ch, func(err error) {
+		calls += 1
+	}, context.TODO())
+
+	c, _ := Collect(f, context.TODO())
+	if len(c) != l {
+		t.Errorf("got %d, want %d", len(c), l)
+	}
+
+	if calls != 2 {
+		t.Errorf("error callback should been called %d times got %d", errs, calls)
+	}
+
 }

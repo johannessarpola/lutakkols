@@ -159,8 +159,9 @@ func FilterError[T any](resChan <-chan Result[T], onError func(err error), conte
 				}
 				if res.Err != nil {
 					onError(res.Err)
+				} else {
+					out <- res.Val
 				}
-				out <- res.Val
 			}
 		}
 	}(onError)
