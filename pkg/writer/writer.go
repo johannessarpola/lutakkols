@@ -7,6 +7,7 @@ import (
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/johannessarpola/lutakkols/pkg/pipes"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -65,7 +66,13 @@ func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) <
 // WriteJson general purpose func to write generic object to a file as json
 func WriteJson(data interface{}, outFile string, opts ...WriteOption) error {
 	// Open a file for writing
-	err := os.MkdirAll(outFile, os.ModePerm)
+
+	dir := filepath.Dir(outFile)
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
 	file, err := os.Create(outFile)
 	if err != nil {
 		return err

@@ -15,10 +15,11 @@ import (
 )
 
 type config struct {
-	Address string
-	Offline bool
-	LogFile string
-	Verbose bool
+	Address  string
+	Offline  bool
+	InputDir string
+	LogFile  string
+	Verbose  bool
 }
 
 var Config config
@@ -38,7 +39,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if v.GetBool("offline") {
-			offlineCli("https://www.jelmu.net", ".data")
+			offlineCli(Config.InputDir)
 		} else {
 			onlineCli("https://www.jelmu.net")
 		}
@@ -68,9 +69,9 @@ func onlineCli(path string) {
 	setupTMUI(p)
 }
 
-func offlineCli(source string, outputDir string) {
-	ep := path.Join(outputDir, constants.EventsFile)
-	edp := path.Join(outputDir, constants.EventsDetailsFile)
+func offlineCli(inputDir string) {
+	ep := path.Join(inputDir, constants.EventsFile)
+	edp := path.Join(inputDir, constants.EventsDetailsFile)
 
 	config := provider.Config{
 		EventSourceFsPath:  ep,
@@ -91,6 +92,7 @@ func init() {
 
 	rootCmd.Flags().StringVarP(&Config.Address, "address", "a", "https://www.jelmu.net", "Server address")
 	rootCmd.Flags().BoolVarP(&Config.Offline, "offline", "o", false, "Run in offline mode")
+	rootCmd.Flags().StringVarP(&Config.InputDir, "input_dir", "i", "input_dir", "Directory to use with offline mode")
 	rootCmd.Flags().StringVarP(&Config.LogFile, "logfile", "l", "debug.log", "File to write log into")
 	// Inherited for all
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose")
@@ -105,6 +107,11 @@ func init() {
 	}
 
 	err = v.BindPFlag("logfile", rootCmd.Flags().Lookup("logfile"))
+	if err != nil {
+		fmt.Printf("could not bind flag: %v\n", err)
+	}
+
+	err = v.BindPFlag("input_dir", rootCmd.Flags().Lookup("input_dir"))
 	if err != nil {
 		fmt.Printf("could not bind flag: %v\n", err)
 	}
