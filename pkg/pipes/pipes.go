@@ -31,6 +31,7 @@ func Map[T any, O any](in <-chan T, fn func(T) (O, error), context context.Conte
 		for {
 			select {
 			case <-context.Done():
+				out <- Result[O]{Err: context.Err()}
 				return
 			case value, ok := <-in:
 				if !ok {
