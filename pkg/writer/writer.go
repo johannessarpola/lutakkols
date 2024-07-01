@@ -65,6 +65,7 @@ func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) <
 // WriteJson general purpose func to write generic object to a file as json
 func WriteJson(data interface{}, outFile string, opts ...WriteOption) error {
 	// Open a file for writing
+	err := os.MkdirAll(outFile, os.ModePerm)
 	file, err := os.Create(outFile)
 	if err != nil {
 		return err
