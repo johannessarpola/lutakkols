@@ -15,14 +15,12 @@ type Result[T any] struct {
 }
 
 // Pour consumes a channel, collects them into array and calls the sink func with it, respecting context cancellation
-func Pour[T any](head T, in <-chan T, sink func([]T) error, ctx context.Context) error {
-	var h []T = []T{head}
-
-	collect, err := Collect(in, ctx)
+func Pour[T any](in <-chan T, sink func([]T) error, ctx context.Context, initial ...T) error {
+	collect, err := Collect(in, ctx, initial...)
 	if err != nil {
 		return err
 	}
-	return sink(append(h, collect...))
+	return sink(collect)
 }
 
 // Map transforms elements in channel to another type
@@ -78,8 +76,8 @@ func Materialize[T any](in <-chan *T, context context.Context) <-chan T {
 }
 
 // Collect reads from the input channel and collects elements into a slice, respecting context cancellation
-func Collect[T any](in <-chan T, ctx context.Context) ([]T, error) {
-	var result []T
+func Collect[T any](in <-chan T, ctx context.Context, initial ...T) ([]T, error) {
+	result := initial
 	for {
 		select {
 		case <-ctx.Done():

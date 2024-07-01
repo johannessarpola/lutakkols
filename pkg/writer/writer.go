@@ -3,7 +3,6 @@ package writer
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/johannessarpola/lutakkols/pkg/api/options"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/johannessarpola/lutakkols/pkg/pipes"
@@ -27,7 +26,10 @@ func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) <
 		defer close(resultChan)
 
 		var head T
+
 	initialWait:
+		// This is here to allow for separate timeout for waiting for messages and then to write
+		// It either waits for timeout from time.After or first message from the channel
 		for {
 			select {
 			case <-time.After(timeout):
@@ -36,7 +38,6 @@ func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) <
 				return
 			case head = <-chn:
 				// we receive first messages before timeout, continue
-				fmt.Println("!!!!!!!!!!!!!! Received message")
 				break initialWait
 			}
 		}
@@ -44,9 +45,10 @@ func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) <
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
-		err := pipes.Pour(head, chn, func(elements []T) error {
+		// head is passed on to pipes.Pour as initial array as there should be a different timeout for listen and write
+		err := pipes.Pour(chn, func(elements []T) error {
 			return WriteJson(elements, filename, PrettyPrint)
-		}, ctx)
+		}, ctx, head)
 
 		if err != nil {
 			logger.Log.Error("write error", err)
