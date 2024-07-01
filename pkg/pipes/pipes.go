@@ -43,9 +43,9 @@ func Map[T any, O any](in <-chan T, fn func(T) (O, error), context context.Conte
 							out <- Result[O]{Err: fmt.Errorf("panic in transformation: %v", r)}
 						}
 					}()
-					t, err := fn(value)
+					mappedValue, err := fn(value)
 					select {
-					case out <- Result[O]{Val: t, Err: err}:
+					case out <- Result[O]{Val: mappedValue, Err: err}:
 					case <-context.Done():
 						return
 					}

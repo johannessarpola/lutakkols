@@ -173,3 +173,38 @@ func TestFilter(t *testing.T) {
 	}
 
 }
+
+func TestMap(t *testing.T) {
+	l := 10
+	ch := make(chan int)
+
+	go func() {
+
+		for i := 0; i < l; i++ {
+			ch <- i
+		}
+
+		defer close(ch)
+	}()
+
+	mapped := Map(ch, func(n int) (string, error) {
+		return fmt.Sprintf("nbr - %d", n), nil
+	}, context.TODO())
+
+	var vals []string
+	var errs []error
+	for s := range mapped {
+		vals = append(vals, s.Val)
+		if s.Err != nil {
+			errs = append(errs, s.Err)
+		}
+	}
+
+	if len(vals) != l {
+		t.Errorf("got %d values, want %d", len(vals), l)
+	}
+
+	if len(errs) != 0 {
+		t.Errorf("expected no errors got %d", len(errs))
+	}
+}
