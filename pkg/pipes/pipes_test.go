@@ -3,6 +3,7 @@ package pipes
 
 import (
 	"context"
+	"sync"
 	"testing"
 )
 
@@ -46,5 +47,40 @@ func TestPour(t *testing.T) {
 			cntr += i
 		}
 		return nil
-	}, context.Background())
+	}, context.TODO())
+}
+
+type element struct {
+	Value int
+}
+
+func TestMaterialize(t *testing.T) {
+	ch := make(chan *element, 1)
+	ptrele := element{Value: 10}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+
+		ch <- &ptrele
+		close(ch)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	mat := Materialize(ch, context.TODO())
+
+	received := element{}
+	for ele := range mat {
+		received = ele
+		break
+
+	}
+	ptrele.Value = 22
+
+	if received.Value == ptrele.Value {
+		t.Errorf("the value was different, got %d and %d", received.Value, ptrele.Value)
+	}
+
 }
