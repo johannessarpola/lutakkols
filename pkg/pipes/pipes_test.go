@@ -3,6 +3,8 @@ package pipes
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 	"sync"
 	"testing"
 )
@@ -71,16 +73,63 @@ func TestMaterialize(t *testing.T) {
 
 	mat := Materialize(ch, context.TODO())
 
-	received := element{}
-	for ele := range mat {
-		received = ele
-		break
-
-	}
+	received := <-mat
 	ptrele.Value = 22
+
+	empty := element{}
+	if received == empty {
+		t.Errorf("element was empty")
+	}
+
+	if fmt.Sprintf("%p", &received) == fmt.Sprintf("%p", &ptrele) {
+		t.Errorf("expected different addresses, got %p and %p", &received, &ptrele)
+	}
 
 	if received.Value == ptrele.Value {
 		t.Errorf("the value was different, got %d and %d", received.Value, ptrele.Value)
 	}
 
+}
+
+func TestFanOut(t *testing.T) {
+	l := 10
+	ch := make(chan int)
+
+	go func() {
+		for i := 0; i < l; i++ {
+			ch <- 1
+		}
+		close(ch)
+	}()
+
+	c1, c2 := FanOut(ch, context.TODO())
+
+	col1, _ := Collect(c1, context.TODO())
+	col2, _ := Collect(c2, context.TODO())
+
+	if len(col1) != len(col2) {
+		t.Errorf("got %d, want %d", len(col1), len(col2))
+	}
+	b := reflect.DeepEqual(col1, col2)
+
+	if !b {
+		t.Errorf("got %p, want %p", col1, col2)
+	}
+
+}
+
+func TestCollect(t *testing.T) {
+	l := 10
+	ch := make(chan int, l)
+
+	for i := 0; i < l; i++ {
+		ch <- 1
+	}
+	close(ch)
+
+	col, _ := Collect(ch, context.TODO())
+
+	if len(col) != l {
+		t.Errorf("got %d, want %d", len(col), l)
+	}
 }

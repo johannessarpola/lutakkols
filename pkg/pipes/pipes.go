@@ -100,29 +100,45 @@ func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
 	o1 := make(chan T)
 	o2 := make(chan T)
 	go func() {
-		defer close(o1)
-		defer close(o2)
+		var arr []T
+
+	consume:
 		for {
 			select {
 			case <-ctx.Done():
-				return
+				break consume
 			case v, ok := <-in:
 				if !ok {
-					return
+					break consume
 				}
-				// Non-blocking send using select to prevent goroutine leak
+				arr = append(arr, v)
+			}
+		}
+
+		go func(arr []T) {
+			defer close(o1)
+
+			for _, e := range arr {
 				select {
-				case o1 <- v:
-				case <-ctx.Done():
-					return
-				}
-				select {
-				case o2 <- v:
+				case o1 <- e:
 				case <-ctx.Done():
 					return
 				}
 			}
-		}
+		}(arr)
+
+		go func(arr []T) {
+			defer close(o2)
+
+			for _, e := range arr {
+				select {
+				case o2 <- e:
+				case <-ctx.Done():
+					return
+				}
+			}
+		}(arr)
+
 	}()
 
 	return o1, o2
