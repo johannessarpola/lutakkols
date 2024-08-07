@@ -1,4 +1,4 @@
-// Package pipes contains bunch of FP styled functions for channels
+// Package pipes contains a bunch of FP styled functions for channels
 package pipes
 
 import (
@@ -10,10 +10,6 @@ import (
 	"testing"
 	"time"
 )
-
-func dummySink[T any](data []T) error {
-	return nil
-}
 
 func TestPour(t *testing.T) {
 	l := 10

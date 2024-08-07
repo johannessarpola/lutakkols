@@ -44,12 +44,3 @@ func New(config *Config, opt options.TypeOption) (Provider, error) {
 		return nil, errors.New("invalid option")
 	}
 }
-
-// NewDownloader constructs obj which can be used to download data
-func NewDownloader(config *Config) (Downloader, error) {
-	b := (&builder.DownloaderBuilder{}).
-		WithEventSourceFsPath(config.EventSourceFsPath).
-		WithEventDetailsFsPath(config.EventDetailsFsPath).
-		WitEventsSourceURL(config.EventsSourceURL)
-	return b.Build()
-}

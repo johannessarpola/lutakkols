@@ -27,7 +27,6 @@ var (
 	footerStyle           = lipgloss.NewStyle().PaddingTop(2).PaddingLeft(2).PaddingBottom(1)
 	paginationStyle       = lipgloss.NewStyle().PaddingLeft(2)
 	subduedColor          = lipgloss.AdaptiveColor{Light: "#9B9B9B", Dark: "#5C5C5C"}
-	subtitleStyle         = lipgloss.NewStyle().PaddingTop(1).Foreground(subduedColor)
 	titleBoxStyle         = lipgloss.NewStyle().MarginBottom(1)
 	updatedAtStyle        = lipgloss.NewStyle().Foreground(subduedColor)
 	asciiPlaceholderStyle = lipgloss.NewStyle().Width(asciiWidth * 0.7).Padding(1)

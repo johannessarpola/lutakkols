@@ -1,4 +1,4 @@
-// Package pool contains a simple threadpool to use to queue work concurrently and then aggregate the resultQueue into a single result
+// Package workset contains a simple pool to use to queue work concurrently and then aggregate the resultQueue into a single result
 package workset
 
 import (

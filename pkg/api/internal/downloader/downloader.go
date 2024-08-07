@@ -67,7 +67,7 @@ func New(
 
 }
 
-// DownloadData updates the data written on the disk
+// Download updates the data written on the disk
 func (m *Downloader) Download() error {
 	if len(m.onlineURL) == 0 {
 		return errors.New("no online url provided")

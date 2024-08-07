@@ -134,7 +134,10 @@ func (m EventList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch keypress := msg.String(); keypress {
 		case "g":
 			selectedEvent := m.list.SelectedItem().(EventViewListItem)
-			browser.Open(selectedEvent.Event.EventLink)
+			err := browser.Open(selectedEvent.Event.EventLink)
+			if err != nil {
+				panic(err)
+			}
 		case "r", "f5":
 			if m.DataUpdated.Before(time.Now().Add(-30 * time.Second)) {
 				m.loading = true
