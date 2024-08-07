@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"reflect"
+	"sync"
 )
 
 // Result is a struct to wrap either a element or a error
@@ -93,6 +94,39 @@ func Collect[T any](in <-chan T, ctx context.Context, initial ...T) ([]T, error)
 			result = append(result, v)
 		}
 	}
+}
+
+func FanIn[T any](ctx context.Context, chans ...chan T) chan T {
+	wg := &sync.WaitGroup{}
+	wg.Add(len(chans))
+
+	out := make(chan T)
+	for _, ch := range chans {
+		go func(ch <-chan T, wg *sync.WaitGroup) {
+			defer func() {
+				wg.Done()
+			}()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case v, ok := <-ch:
+					if ok {
+						out <- v
+					} else {
+						return
+					}
+				}
+			}
+		}(ch, wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+
+	return out
 }
 
 // FanOut fans a input channel out into two channels, respecting context cancellation

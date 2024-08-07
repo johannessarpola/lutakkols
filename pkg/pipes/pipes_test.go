@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 )
 
 func dummySink[T any](data []T) error {
@@ -116,7 +117,41 @@ func TestFanOut(t *testing.T) {
 	if !b {
 		t.Errorf("got %p, want %p", col1, col2)
 	}
+}
 
+func TestFanoIn(t *testing.T) {
+	maxl := 10
+	cs := []chan int{
+		make(chan int),
+		make(chan int),
+		make(chan int),
+	}
+
+	for i, ch := range cs {
+		go func(i int, ch chan int) {
+			defer close(ch)
+			for j := 0; j < maxl; j++ {
+				ch <- j * ((i + 1) * 10)
+			}
+		}(i, ch)
+	}
+
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*10)
+	defer cancel()
+	combined := FanIn[int](ctx, cs...)
+
+	var res []int
+	for nbr := range combined {
+		res = append(res, nbr)
+	}
+
+	if len(res) == 0 {
+		t.Errorf("got empty results")
+	}
+
+	if len(res) != maxl*len(cs) {
+		t.Errorf("got %d, want %d", len(res), maxl*len(cs))
+	}
 }
 
 func TestCollect(t *testing.T) {
