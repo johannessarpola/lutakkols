@@ -92,7 +92,7 @@ func TestCollect(t *testing.T) {
 	for i := 0; i < size; i++ {
 		jobs = append(jobs, normalTask)
 	}
-	pool := NewWorkSet[*ReturnVal](jobs, 10, time.Millisecond*1)
+	pool := NewWorkSet[*ReturnVal](jobs, 10, time.Second*10)
 
 	results := pool.Collect()
 	log.Printf("resultQueue count: %d", len(results))

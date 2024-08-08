@@ -144,7 +144,6 @@ func TestParMap(t *testing.T) {
 	}
 
 	out, _ := ParMap(process, context.TODO(), cs...)
-	defer close(out)
 	var rs []string
 	for s := range out {
 		rs = append(rs, s)

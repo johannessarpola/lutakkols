@@ -126,7 +126,7 @@ func downloadDetails(events []models.Event, outPath string, concurrentSize int) 
 	}
 
 	timeout := time.Second * 10
-	ws := workset.NewWorkSet(jobs, concurrentSize, timeout)
+	ws := workset.NewWorkSet(jobs, concurrentSize, timeout) // TODO Move the functionality to use pipes pkg at some point
 	for _, result := range ws.Collect() {
 		if result.Value != nil {
 			rs = append(rs, result.Value)
