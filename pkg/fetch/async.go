@@ -18,6 +18,7 @@ var Async asyncSource
 
 // Events loads the events and has a rate limiting functionality for the output channel, respecting context
 // pointers are used so that there's no copying by value
+// TODO Fix to use pipes pkg and separate ratelimit functionality
 func (a asyncSource) Events(url string, waitTime time.Duration, context context.Context) <-chan pipes.Result[*models.Event] {
 	rateLimit := time.NewTicker(waitTime)
 	resChan := make(chan pipes.Result[*models.Event])
