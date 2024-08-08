@@ -120,6 +120,44 @@ func TestMaterialize(t *testing.T) {
 
 }
 
+func TestRoundRobinFanOut(t *testing.T) {
+	l := 100
+	ch := make(chan int, l)
+
+	go func(ch chan int) {
+		defer close(ch)
+		for i := 0; i < l; i++ {
+			ch <- 1
+		}
+	}(ch)
+
+	count := 4
+	chans := RoundRobinFanOut(ch, context.TODO(), count)
+
+	wg := &sync.WaitGroup{}
+	cl := 0
+	incrementer := 0
+	for _, ch := range chans {
+		wg.Add(1)
+		cl++
+		go func(ch chan int) {
+			for _ = range ch {
+				incrementer++
+			}
+			defer wg.Done()
+		}(ch)
+	}
+
+	wg.Wait()
+	if cl != count {
+		t.Errorf("got %d results, want %d", cl, count)
+	}
+
+	if incrementer != l {
+		t.Errorf("got %d number results, expected %d", incrementer, l)
+	}
+}
+
 func TestFanOut(t *testing.T) {
 	l := 10
 	ch := make(chan int)

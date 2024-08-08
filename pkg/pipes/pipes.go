@@ -96,6 +96,7 @@ func Collect[T any](in <-chan T, ctx context.Context, initial ...T) ([]T, error)
 	}
 }
 
+// Filter filters elements from channels that return `false`  from predicate function
 func Filter[T any](ctx context.Context, in <-chan T, predicate func(T) bool) chan T {
 	out := make(chan T)
 	go func(ch <-chan T) {
@@ -150,6 +151,43 @@ func FanIn[T any](ctx context.Context, chans ...chan T) chan T {
 	}()
 
 	return out
+}
+
+// RoundRobinFanout
+func RoundRobinFanOut[T any](in <-chan T, ctx context.Context, outChannelCounts int) []chan T {
+	ocl := make([]chan T, outChannelCounts)
+	for i := 0; i < outChannelCounts; i++ {
+		ocl[i] = make(chan T)
+	}
+
+	go func() {
+		defer func() {
+			for _, c := range ocl {
+				close(c)
+			}
+		}()
+
+		r, err := NewRing(ocl)
+		if err != nil {
+			panic(err)
+		}
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case v, ok := <-in:
+				if !ok {
+					return
+				}
+				r.next <- v
+			}
+
+		}
+
+	}()
+
+	return ocl
 }
 
 // FanOut fans a input channel out into two channels, respecting context cancellation
