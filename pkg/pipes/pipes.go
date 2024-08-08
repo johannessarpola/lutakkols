@@ -25,7 +25,7 @@ func Pour[T any](in <-chan T, sink func([]T) error, ctx context.Context, initial
 }
 
 // Map transforms elements in channel to another type
-func Map[T any, O any](in <-chan T, fn func(T) (O, error), context context.Context) <-chan Result[O] {
+func Map[T any, O any](in <-chan T, fn func(T) (O, error), context context.Context) chan Result[O] {
 	out := make(chan Result[O])
 	go func() {
 		defer close(out)
@@ -58,7 +58,7 @@ func Map[T any, O any](in <-chan T, fn func(T) (O, error), context context.Conte
 }
 
 // Materialize copies the pointer values into another channel as a concrete type, respecting context cancellation
-func Materialize[T any](in <-chan *T, context context.Context) <-chan T {
+func Materialize[T any](in <-chan *T, context context.Context) chan T {
 	out := make(chan T)
 	go func(in <-chan *T) {
 		defer close(out)
@@ -237,7 +237,7 @@ func RoundRobinFanOut[T any](
 }
 
 // FanOut fans a input channel out into two channels, respecting context cancellation
-func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
+func FanOut[T any](in <-chan T, ctx context.Context) (chan T, chan T) {
 	o1 := make(chan T)
 	o2 := make(chan T)
 	go func() {
@@ -286,7 +286,7 @@ func FanOut[T any](in <-chan T, ctx context.Context) (<-chan T, <-chan T) {
 }
 
 // FilterError filters errored Results from channel and calls onError for each, respecting context cancellation
-func FilterError[T any](resChan <-chan Result[T], onError func(err error), context context.Context) <-chan T {
+func FilterError[T any](resChan <-chan Result[T], onError func(err error), context context.Context) chan T {
 	out := make(chan T)
 	go func(onError func(err error)) {
 		defer close(out)
