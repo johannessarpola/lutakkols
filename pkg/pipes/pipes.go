@@ -127,9 +127,7 @@ func FanIn[T any](ctx context.Context, chans ...chan T) chan T {
 	out := make(chan T)
 	for _, ch := range chans {
 		go func(ch <-chan T, wg *sync.WaitGroup) {
-			defer func() {
-				wg.Done()
-			}()
+			defer wg.Done()
 			for {
 				select {
 				case <-ctx.Done():
@@ -153,8 +151,56 @@ func FanIn[T any](ctx context.Context, chans ...chan T) chan T {
 	return out
 }
 
-// RoundRobinFanout
-func RoundRobinFanOut[T any](in <-chan T, ctx context.Context, outChannelCounts int) []chan T {
+// ParMap processes each input channel into single output channel, second chanel for errors if such occur with the process
+func ParMap[T any, O any](process func(T) (O, error), context context.Context, channels ...chan T) (chan O, chan error) {
+	out := make(chan O)
+	errs := make(chan error, len(channels))
+	wg := &sync.WaitGroup{}
+	wg.Add(len(channels))
+
+	// Start a goroutine to process each input channel into single output channel result
+	for _, ch := range channels {
+		go func(ch chan T, wg *sync.WaitGroup) {
+			defer wg.Done()
+			for {
+				select {
+				case <-context.Done():
+					errs <- context.Err()
+					return
+				case v, ok := <-ch:
+					if !ok {
+						return
+					}
+					nv, err := process(v)
+
+					// Early quit with error, better safe than sorry
+					if err != nil {
+						errs <- err
+						return
+					}
+					out <- nv
+				}
+			}
+
+		}(ch, wg)
+	}
+
+	// Wait for the subprocesses to finish and the close channels
+	go func() {
+		wg.Wait()
+		close(out)
+		close(errs)
+	}()
+
+	return out, errs
+}
+
+// RoundRobinFanOut fans a channel out into `outChannelCounts` - number of output channels in round robin manner
+func RoundRobinFanOut[T any](
+	in <-chan T,
+	ctx context.Context,
+	outChannelCounts int,
+) []chan T {
 	ocl := make([]chan T, outChannelCounts)
 	for i := 0; i < outChannelCounts; i++ {
 		ocl[i] = make(chan T)

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"sync"
 	"testing"
@@ -116,6 +117,45 @@ func TestMaterialize(t *testing.T) {
 
 	if received.Value == ptrele.Value {
 		t.Errorf("the value was different, got %d and %d", received.Value, ptrele.Value)
+	}
+
+}
+
+func TestParMap(t *testing.T) {
+	perChannel := 10
+	channels := 4
+	cs := make([]chan int, channels)
+
+	for i := 0; i < channels; i++ {
+		ch := make(chan int)
+		go func(i int, ch chan int) {
+			defer close(ch)
+			for j := 0; j < perChannel; j++ {
+				ch <- j * ((i + 1) * 10)
+			}
+		}(i, ch)
+		cs[i] = ch
+	}
+	mr := 1000
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	process := func(v int) (string, error) {
+		factored := r.Intn(mr) * v
+		return fmt.Sprintf("%d", factored), nil
+	}
+
+	out, _ := ParMap(process, context.TODO(), cs...)
+	defer close(out)
+	var rs []string
+	for s := range out {
+		rs = append(rs, s)
+	}
+
+	if len(rs) == 0 {
+		t.Errorf("got no results")
+	}
+
+	if len(rs) != perChannel*channels {
+		t.Errorf("got %d number results, wanted %d", len(rs), perChannel*channels)
 	}
 
 }
