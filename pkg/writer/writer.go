@@ -21,7 +21,7 @@ const (
 
 // WriteChannel is a method to write elements from a channel into a file respecting a timeout, it returns a channel
 // which either signals Success or Error (buffered to 1)
-func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) <-chan pipes.Result[bool] {
+func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) chan pipes.Result[bool] {
 	resultChan := make(chan pipes.Result[bool], 1)
 	go func() {
 		defer close(resultChan)

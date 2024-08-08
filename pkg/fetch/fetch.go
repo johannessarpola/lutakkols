@@ -11,7 +11,6 @@ import (
 	"image"
 	"io"
 	"net/http"
-	"sync/atomic"
 	"time"
 )
 
@@ -26,24 +25,24 @@ func EventImage(url string) (string, error) {
 	return converter.Image2ASCIIString(*img, defaultConvertorOptions()), nil
 }
 
-func handleEvent(ord *atomic.Int32, e *colly.HTMLElement) models.Event {
+func handleEvent(ord int, e *colly.HTMLElement) (models.Event, error) {
 	evt := extractEvent(e)
 	evt.UpdatedAt = time.Now()
-	evt.Order = ord.Add(1)
-	return evt
+	evt.Order = ord
+	return evt, nil
 }
 
 // Events fetches the events from the source
 func Events(url string) ([]models.Event, error) {
 	c := newCollector()
 	var events []models.Event
-	var ord atomic.Int32
-	ord.Store(0)
+	ord := 0
 
 	c.OnHTML(selectors.Events, func(e *colly.HTMLElement) {
 		evt := extractEvent(e)
 		evt.UpdatedAt = time.Now()
-		evt.Order = ord.Add(1)
+		evt.Order = ord
+		ord += 1
 		events = append(events, evt)
 	})
 

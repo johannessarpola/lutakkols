@@ -18,7 +18,7 @@ func TestRatelimit(t *testing.T) {
 	}(ch)
 
 	interval := time.Microsecond * 100
-	rl := Ratelimit(ch, interval, context.TODO())
+	rl := ThrottleChannel(ch, interval, context.TODO())
 
 	cont := true
 	cntr := 0

@@ -33,26 +33,24 @@ func Run(conf RunConfig) {
 	timeout := conf.Timeout
 	logger.Log.Infof("Starting sync with timeout %v against URL %s writing events to %s and details to %s", timeout, conf.SourceURL, conf.EventsFn, conf.EventDetailsFn)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	ctx = context.WithValue(ctx, "max", conf.EventLimit)
-
-	eventResults := fetch.Async.Events(conf.SourceURL, conf.RateLimit, ctx)
-	events := pipes.FilterError(eventResults, func(err error) {
-		logger.Log.Error("event error ", err)
-	}, ctx)
-
 	defer cancel()
 
+	events := fetch.Async.Events(conf.SourceURL, conf.EventLimit, ctx)
 	e1, e2 := pipes.FanOut(events, ctx)
 
 	logger.Log.Infof("Writing events into %s", conf.EventsFn)
-	eventWriteChan := writer.WriteChannel(pipes.Materialize(e2, ctx), conf.EventsFn, timeout)
 
-	detailResults := fetch.Async.Details(e1, ctx)
+	eventWriteChan := make(chan pipes.Result[bool])
+	detailsWriteChan := make(chan pipes.Result[bool])
+
+	eventWriteChan = writer.WriteChannel(e1, conf.EventsFn, timeout)
+
+	rateLimitedEvents := pipes.ThrottleChannel(e2, time.Second, ctx)
+	detailResults := fetch.Async.Details(rateLimitedEvents, ctx)
 	details := pipes.FilterError(detailResults, func(err error) {
 		logger.Log.Warn("details error ", err)
 	}, ctx)
-
-	detailsWriteChan := writer.WriteChannel(pipes.Materialize(details, ctx), conf.EventDetailsFn, timeout)
+	detailsWriteChan = writer.WriteChannel(pipes.Materialize(details, ctx), conf.EventDetailsFn, timeout)
 
 	var dwr1, dwr2 bool
 

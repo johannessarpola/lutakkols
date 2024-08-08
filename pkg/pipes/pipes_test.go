@@ -203,7 +203,7 @@ func TestFanOut(t *testing.T) {
 
 	go func() {
 		for i := 0; i < l; i++ {
-			ch <- 1
+			ch <- i
 		}
 		close(ch)
 	}()

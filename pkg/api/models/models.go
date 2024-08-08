@@ -6,7 +6,7 @@ import "time"
 // Event is an event with some basic information scraped from the shorter description
 type Event struct {
 	Id             string    `json:"id"`
-	Order          int32     `json:"order"`
+	Order          int       `json:"order"`
 	Headline       string    `json:"headline"`
 	EventLink      string    `json:"event_link"`
 	SmallImageLink string    `json:"image_link"`

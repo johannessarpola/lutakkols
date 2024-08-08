@@ -7,7 +7,6 @@ import (
 	"github.com/johannessarpola/lutakkols/pkg/fetch/selectors"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/johannessarpola/lutakkols/pkg/pipes"
-	"sync/atomic"
 	"time"
 )
 
@@ -16,66 +15,48 @@ type asyncSource struct{}
 // Async namespaced methods for fetch
 var Async asyncSource
 
-// Events loads the events and has a rate limiting functionality for the output channel, respecting context
-// pointers are used so that there's no copying by value
-// TODO Fix to use pipes pkg and separate ratelimit functionality
-func (a asyncSource) Events(url string, waitTime time.Duration, context context.Context) <-chan pipes.Result[*models.Event] {
-	rateLimit := time.NewTicker(waitTime)
-	resChan := make(chan pipes.Result[*models.Event])
-	maxCount, maxCountOk := context.Value("max").(int)
-	if maxCountOk {
-		logger.Log.Infof("Fetching %d events from %s", maxCount, url)
-	}
+// Events loads the events and has a rate limiting functionality for the output channel
+func (a asyncSource) Events(url string, max int, ctx context.Context) chan models.Event {
+	out := make(chan models.Event)
 
-	limitReached := false
 	go func() {
-		defer func() {
-			close(resChan)
-			rateLimit.Stop()
-		}()
+		defer close(out)
+		ord := 0
 		c := newCollector()
+		var events []models.Event
 
-		var ord atomic.Int32
-		ord.Store(0)
 		c.OnHTML(selectors.Events, func(e *colly.HTMLElement) {
-			if limitReached {
+
+			if len(events) == max {
 				return
 			}
 
-			evt := handleEvent(&ord, e)
-			r := pipes.Result[*models.Event]{
-				Val: &evt,
-				Err: nil,
-			}
+			evt, _ := handleEvent(ord, e)
+			ord++
+			// Buffer to a array so that this doesn't have to wait for consumer for chan
+			events = append(events, evt)
 
-			select {
-			case <-context.Done():
-				return
-			case <-rateLimit.C:
-				resChan <- r
-				// Can be used to limit the amount of events to fetch
-				if maxCountOk && maxCount != 0 {
-					maxCount -= 1
-					if maxCount == 0 {
-						limitReached = true
-					}
-				}
-
-			}
 		})
 
 		e := c.Visit(url)
 		if e != nil {
-			r := pipes.Result[*models.Event]{
-				Val: nil,
-				Err: e,
-			}
-			resChan <- r
-			return
+			panic(e)
 		}
-		return
+		logger.Log.Debugf("Forwarding %d events into channel", len(events))
+
+		// Forward the events to channel
+		for _, evt := range events {
+			select {
+			case <-ctx.Done():
+				logger.Log.Warnf("Context cancelled")
+				return
+			case out <- evt:
+				// Sent successfully
+			}
+		}
 	}()
-	return resChan
+
+	return out
 }
 
 // Images gets a channel of ascii images for event details, respecting context
@@ -111,10 +92,10 @@ func (a asyncSource) Images(eds <-chan models.EventDetails, context context.Cont
 
 // Details gets a channel of event details for a event stream, respecting context
 // pointers are used so that there's no copying by value
-func (a asyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-chan pipes.Result[*models.EventDetails] {
-	resChan := make(chan pipes.Result[*models.EventDetails])
+func (a asyncSource) Details(eps <-chan models.Event, ctx context.Context) <-chan pipes.Result[*models.EventDetails] {
+	out := make(chan pipes.Result[*models.EventDetails])
 	go func() {
-		defer close(resChan)
+		defer close(out)
 
 		for {
 			select {
@@ -125,12 +106,12 @@ func (a asyncSource) Details(eps <-chan *models.Event, ctx context.Context) <-ch
 					return
 				}
 				v, err := EventDetails(ep.EventURL(), ep.ID())
-				resChan <- pipes.Result[*models.EventDetails]{
+				out <- pipes.Result[*models.EventDetails]{
 					Val: v,
 					Err: err,
 				}
 			}
 		}
 	}()
-	return resChan
+	return out
 }
