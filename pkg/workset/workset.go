@@ -1,7 +1,6 @@
 // Package workset contains a simple pool to use to queue work concurrently and then aggregate the resultQueue into a single result
 package workset
 
-// TODO This should be superseded with utilizing pipes pkg
 import (
 	"errors"
 	"fmt"
@@ -75,7 +74,7 @@ func (p *WorkSet[T]) worker(workerId string) {
 			taskResult := make(chan Result[T], 1)
 
 			// asynchronously startWorkers task so that we can see that it does not exceed taskTimeout
-			go taskHandler[T](task, taskResult)
+			go taskHandler(task, taskResult)
 
 			// Execute but queue not exceed taskTimeout
 			var result Result[T]

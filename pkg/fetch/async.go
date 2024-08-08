@@ -41,7 +41,6 @@ func (a asyncSource) Events(url string, waitTime time.Duration, context context.
 				return
 			}
 
-			n := time.Now()
 			evt := handleEvent(&ord, e)
 			r := pipes.Result[*models.Event]{
 				Val: &evt,
@@ -52,9 +51,7 @@ func (a asyncSource) Events(url string, waitTime time.Duration, context context.
 			case <-context.Done():
 				return
 			case <-rateLimit.C:
-				logger.Log.Debugf("Tick delay %d ms", time.Now().Sub(n).Milliseconds())
 				resChan <- r
-
 				// Can be used to limit the amount of events to fetch
 				if maxCountOk && maxCount != 0 {
 					maxCount -= 1
