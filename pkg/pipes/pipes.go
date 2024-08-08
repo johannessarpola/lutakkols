@@ -96,6 +96,29 @@ func Collect[T any](in <-chan T, ctx context.Context, initial ...T) ([]T, error)
 	}
 }
 
+func Filter[T any](ctx context.Context, in <-chan T, predicate func(T) bool) chan T {
+	out := make(chan T)
+	go func(ch <-chan T) {
+		defer close(out)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case res, ok := <-ch:
+				if !ok {
+					return
+				}
+				if predicate(res) {
+					out <- res
+				}
+			}
+		}
+	}(in)
+
+	return out
+}
+
+// FanIn collects multiple channels into single output channel
 func FanIn[T any](ctx context.Context, chans ...chan T) chan T {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(chans))

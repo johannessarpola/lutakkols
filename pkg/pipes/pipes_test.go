@@ -11,6 +11,37 @@ import (
 	"time"
 )
 
+func TestFilter(t *testing.T) {
+	l := 100
+	ch := make(chan int)
+
+	go func(ch chan int) {
+		defer close(ch)
+		for i := 0; i < l; i++ {
+			ch <- i
+		}
+	}(ch)
+
+	predicate := func(i int) bool {
+		return i >= l/2
+	}
+
+	oc := Filter(context.TODO(), ch, predicate)
+
+	var rs []int
+	for v := range oc {
+		rs = append(rs, v)
+		if !predicate(v) {
+			t.Errorf("filtering did not work for %d", v)
+		}
+	}
+
+	if len(rs) != l/2 {
+		t.Errorf("got %v results, want %v", len(rs), l/2)
+	}
+
+}
+
 func TestPour(t *testing.T) {
 	l := 10
 	ch := make(chan int, 10)
@@ -166,7 +197,7 @@ func TestCollect(t *testing.T) {
 	}
 }
 
-func TestFilter(t *testing.T) {
+func TestFilterError(t *testing.T) {
 	l := 10
 	errs := 2
 	ch := make(chan Result[int])
