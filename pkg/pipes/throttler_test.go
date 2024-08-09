@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestRatelimit(t *testing.T) {
+func testThrottleChannel(t *testing.T) {
 	l := 10
 	ch := make(chan int)
 

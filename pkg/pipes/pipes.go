@@ -9,12 +9,6 @@ import (
 	"sync"
 )
 
-// Result is a struct to wrap either a element or a error
-type Result[T any] struct {
-	Val T
-	Err error
-}
-
 // Pour consumes a channel, collects them into array and calls the sink func with it, respecting context cancellation
 func Pour[T any](in <-chan T, sink func([]T) error, ctx context.Context, initial ...T) error {
 	collect, err := Collect(in, ctx, initial...)
