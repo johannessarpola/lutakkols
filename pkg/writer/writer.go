@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/johannessarpola/lutakkols/pkg/api/options"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
-	"github.com/johannessarpola/lutakkols/pkg/pipes"
+	"github.com/johannessarpola/pipes"
 	"os"
 	"path/filepath"
 	"time"

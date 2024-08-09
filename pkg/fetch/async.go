@@ -6,7 +6,7 @@ import (
 	"github.com/johannessarpola/lutakkols/pkg/api/models"
 	"github.com/johannessarpola/lutakkols/pkg/fetch/selectors"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
-	"github.com/johannessarpola/lutakkols/pkg/pipes"
+	"github.com/johannessarpola/pipes"
 )
 
 type asyncSource struct{}
