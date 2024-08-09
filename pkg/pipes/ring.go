@@ -5,7 +5,6 @@ import "errors"
 // Ring simple struct to work as round robin source for a array
 type Ring[T any] struct {
 	elements []T
-	next     T
 	size     int
 	idx      int
 }
@@ -17,7 +16,6 @@ func NewRing[T any](elements []T) (*Ring[T], error) {
 	}
 	return &Ring[T]{
 		elements: elements,
-		next:     elements[0],
 		size:     len(elements),
 		idx:      0,
 	}, nil
@@ -25,7 +23,7 @@ func NewRing[T any](elements []T) (*Ring[T], error) {
 
 // Next returns the next element tracked with internal indexes, loops back to beginning when at the end
 func (r *Ring[T]) Next() T {
-	n := r.next
+	n := r.elements[r.idx]
 
 	if r.idx == r.size-1 {
 		r.idx = 0
@@ -33,6 +31,5 @@ func (r *Ring[T]) Next() T {
 		r.idx++
 	}
 
-	r.next = r.elements[r.idx]
 	return n
 }

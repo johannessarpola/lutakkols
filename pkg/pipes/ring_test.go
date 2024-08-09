@@ -17,9 +17,7 @@ func TestNewRing(t *testing.T) {
 	if ring.size != len(elements) {
 		t.Errorf("expected size %d, got %d", len(elements), ring.size)
 	}
-	if ring.next != elements[0] {
-		t.Errorf("expected next element %v, got %v", elements[0], ring.next)
-	}
+
 	if ring.idx != 0 {
 		t.Errorf("expected index 0, got %d", ring.idx)
 	}
@@ -56,7 +54,5 @@ func TestRing_Next(t *testing.T) {
 	if ring.idx != 0 {
 		t.Errorf("expected index to wrap around to 0, got %d", ring.idx)
 	}
-	if ring.next != elements[0] {
-		t.Errorf("expected next element to be %v, got %v", elements[0], ring.next)
-	}
+
 }

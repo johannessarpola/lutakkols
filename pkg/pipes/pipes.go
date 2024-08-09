@@ -220,7 +220,7 @@ func RoundRobinFanOut[T any](
 				if !ok {
 					return
 				}
-				r.next <- v
+				r.Next() <- v
 			}
 
 		}
