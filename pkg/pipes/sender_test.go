@@ -6,13 +6,13 @@ import (
 	"time"
 )
 
-func TestDoneOrSend(t *testing.T) {
+func TestSendOrDone(t *testing.T) {
 	c, cancel := context.WithTimeout(context.TODO(), time.Millisecond)
 	defer cancel()
 	ch := make(chan int)
 	n := time.Now()
 	// This should be canceled with context timeout since there is no consumer
-	DoneOrSend(1, ch, c)
+	SendOrDone(1, ch, c)
 
 	// It should be over in 1 Millisecond
 	if time.Since(n) > time.Millisecond*100 {
@@ -26,7 +26,7 @@ func TestDoneOrSend(t *testing.T) {
 	// This sending should succedd as context lifetime is 1 second
 	go func() {
 		defer close(ch)
-		DoneOrSend(1, ch, c2)
+		SendOrDone(1, ch, c2)
 	}()
 
 	for e := range ch {
@@ -38,7 +38,7 @@ func TestDoneOrSend(t *testing.T) {
 	}
 }
 
-func TestTimeoutOrSend(t *testing.T) {
+func TestSendOrTimeout(t *testing.T) {
 	ch1 := make(chan int)
 	ch2 := make(chan int)
 
@@ -48,13 +48,13 @@ func TestTimeoutOrSend(t *testing.T) {
 	// This goroutine sending should not get canceled since there is consumer within the timeout
 	go func() {
 		defer close(ch1)
-		TimeoutOrSend(1, ch1, time.Second)
+		SendOrTimeout(1, ch1, time.Second)
 	}()
 
 	// This goroutine sending should get canceled since there is NO consumer within the timeout
 	go func() {
 		defer close(ch2)
-		TimeoutOrSend(1, ch2, time.Microsecond)
+		SendOrTimeout(1, ch2, time.Microsecond)
 	}()
 
 	for range ch1 {

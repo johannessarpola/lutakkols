@@ -60,24 +60,26 @@ func (a asyncSource) Events(url string, max int, ctx context.Context) chan model
 
 // Images gets a channel of ascii images for event details, respecting context
 // pointers are used so that there's no copying by value
-func (a asyncSource) Images(eds <-chan models.EventDetails, context context.Context) <-chan pipes.Result[models.EventAscii] {
+func (a asyncSource) Images(eds <-chan models.EventDetails, ctx context.Context) <-chan pipes.Result[models.EventAscii] {
 	out := make(chan pipes.Result[models.EventAscii])
 
 	go func() {
 		defer close(out)
 		for {
 			select {
-			case <-context.Done():
+			case <-ctx.Done():
 				return
 			case ed, ok := <-eds:
 				if !ok {
 					return
 				}
 				v, err := Sync.EventImage(ed.ImageURL(), ed.ID())
+
+				var result pipes.Result[models.EventAscii]
 				if err != nil {
-					out <- pipes.NewErrResult[models.EventAscii](err)
+					pipes.SendOrDone(result.WithError(err), out, ctx)
 				} else {
-					out <- pipes.NewResult(v)
+					pipes.SendOrDone(result.WithValue(v), out, ctx)
 				}
 			}
 		}
@@ -101,10 +103,12 @@ func (a asyncSource) Details(eps <-chan models.Event, ctx context.Context) <-cha
 					return
 				}
 				v, err := Sync.EventDetails(ep.EventURL(), ep.ID())
+
+				var result pipes.Result[models.EventDetails]
 				if err != nil {
-					out <- pipes.NewErrResult[models.EventDetails](err)
+					pipes.SendOrDone(result.WithError(err), out, ctx)
 				} else {
-					out <- pipes.NewResult(v)
+					pipes.SendOrDone(result.WithValue(v), out, ctx)
 				}
 			}
 		}

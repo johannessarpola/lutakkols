@@ -25,6 +25,16 @@ func NewResult[T any](val T) Result[T] {
 	}
 }
 
+func (r Result[T]) WithError(err error) Result[T] {
+	r.Err = err
+	return r
+}
+
+func (r Result[T]) WithValue(val T) Result[T] {
+	r.Val = val
+	return r
+}
+
 // Error
 func (r Result[T]) Error() string {
 	if r.Err != nil {
