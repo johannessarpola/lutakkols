@@ -14,15 +14,24 @@ import (
 	"time"
 )
 
+type syncSource struct{}
+
+// Sync namespaced methods for fetch
+var Sync syncSource
+
 // EventImage fetches normal image file and turns it into an ascii art
-func EventImage(url string) (string, error) {
+func (_ syncSource) EventImage(url string, eventID string) (models.EventAscii, error) {
+	var rs models.EventAscii
 	img, err := downloadImage(url)
 	if err != nil {
-		return "", FailedFetch{err: err, url: url}
+		return rs, FailedFetch{err: err, url: url}
 	}
 
 	converter := convert.NewImageConverter()
-	return converter.Image2ASCIIString(*img, defaultConvertorOptions()), nil
+	rs.Ascii = converter.Image2ASCIIString(*img, defaultConvertorOptions())
+	rs.EventID = eventID
+	rs.UpdatedAt = time.Now()
+	return rs, nil
 }
 
 func handleEvent(ord int, e *colly.HTMLElement) (models.Event, error) {
@@ -33,7 +42,7 @@ func handleEvent(ord int, e *colly.HTMLElement) (models.Event, error) {
 }
 
 // Events fetches the events from the source
-func Events(url string) ([]models.Event, error) {
+func (_ syncSource) Events(url string) ([]models.Event, error) {
 	c := newCollector()
 	var events []models.Event
 	ord := 0
@@ -55,7 +64,7 @@ func Events(url string) ([]models.Event, error) {
 }
 
 // EventDetails fetches the eventDetails for eventUrl from source
-func EventDetails(url string, eventId string) (*models.EventDetails, error) {
+func (_ syncSource) EventDetails(url string, eventId string) (models.EventDetails, error) {
 	c := newCollector()
 	ed := models.EventDetails{}
 	ed.EventID = eventId
@@ -85,9 +94,9 @@ func EventDetails(url string, eventId string) (*models.EventDetails, error) {
 
 	err := c.Visit(url)
 	if err != nil {
-		return nil, FailedFetch{err: err, url: url}
+		return ed, FailedFetch{err: err, url: url}
 	}
-	return &ed, nil
+	return ed, nil
 
 }
 

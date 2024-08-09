@@ -50,7 +50,7 @@ func Run(conf RunConfig) {
 	details := pipes.FilterError(detailResults, func(err error) {
 		logger.Log.Warn("details error ", err)
 	}, ctx)
-	detailsWriteChan = writer.WriteChannel(pipes.Materialize(details, ctx), conf.EventDetailsFn, timeout)
+	detailsWriteChan = writer.WriteChannel(details, conf.EventDetailsFn, timeout)
 
 	var dwr1, dwr2 bool
 

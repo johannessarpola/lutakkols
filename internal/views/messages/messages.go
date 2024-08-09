@@ -7,7 +7,7 @@ import (
 )
 
 type EventDescriptionFetched struct {
-	Details         *models.EventDetails
+	Details         models.EventDetails
 	ProviderOptions []options.ProviderOption
 }
 

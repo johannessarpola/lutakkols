@@ -29,33 +29,6 @@ type EventDetails struct {
 	UpdatedAt   time.Time         `json:"updated_at,omitempty"`
 }
 
-// HasID interface to allow to use general access to ID variable (usually event.ID)
-type HasID interface {
-	ID() string
-}
-
-func (e Event) ID() string {
-	return e.Id
-}
-func (e Event) EventURL() string { return e.EventLink }
-
-func (ed EventDetails) ID() string {
-	return ed.EventID
-}
-func (ed EventDetails) ImageURL() string {
-	return ed.ImageLink
-}
-
-type EventPartial interface {
-	HasID
-	EventURL() string
-}
-
-type EventDetailsPartial interface {
-	HasID
-	ImageURL() string
-}
-
 // Ticket single ticket for event
 type Ticket struct {
 	Description string `json:"description"`

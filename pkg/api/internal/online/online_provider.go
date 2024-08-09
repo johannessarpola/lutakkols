@@ -48,40 +48,35 @@ func (m *Provider) withInitialOpts(additionalOpts []options.ProviderOption) []op
 	return append(m.defaultOpts, additionalOpts...)
 }
 
-func (m *Provider) GetAscii(eventID string, imageURL string, opts ...options.ProviderOption) (*models.EventAscii, error) {
+func (m *Provider) GetAscii(eventID string, imageURL string, opts ...options.ProviderOption) (models.EventAscii, error) {
+	var ea models.EventAscii
+	var err error
 
 	if len(imageURL) == 0 {
-		return nil, errors.New("event details nil or link missing")
+		return ea, errors.New("image link missing")
 	}
 	if m.useCache(opts) {
 		value, ts, ok := m.fetchCache.GetAscii(eventID)
 		if ok {
 			value.UpdatedAt = ts
-			logger.Log.Debugf("fetched ascii from caching with id %s", eventID)
+			logger.Log.Debugf("fetched ea from caching with id %s", eventID)
 			return value, nil
 		}
 	}
 
-	ascii, err := fetch.EventImage(imageURL)
-	if err != nil {
-		return nil, err
+	ea, err = fetch.Sync.EventImage(imageURL, eventID)
+	if err == nil {
+		m.fetchCache.SetAscii(eventID, ea)
 	}
-
-	ea := models.EventAscii{
-		Ascii:   ascii,
-		EventID: eventID,
-	}
-
-	if len(ascii) > 0 {
-		m.fetchCache.SetAscii(ea.EventID, ea)
-	}
-	return &ea, nil
+	return ea, err
 }
 
-func (m *Provider) GetDetails(eventID string, eventURL string, opts ...options.ProviderOption) (*models.EventDetails, error) {
+func (m *Provider) GetDetails(eventID string, eventURL string, opts ...options.ProviderOption) (models.EventDetails, error) {
+	var ed models.EventDetails
+	var err error
 
 	if len(eventURL) == 0 {
-		return nil, errors.New("event url missing")
+		return ed, errors.New("event url missing")
 	}
 	if m.useCache(opts) {
 		value, ts, ok := m.fetchCache.GetDetails(eventID)
@@ -92,14 +87,12 @@ func (m *Provider) GetDetails(eventID string, eventURL string, opts ...options.P
 		}
 	}
 
-	ed, err := fetch.EventDetails(eventURL, eventID)
-	if err != nil {
-		return nil, err
+	ed, err = fetch.Sync.EventDetails(eventURL, eventID)
+	if err == nil {
+		m.fetchCache.SetDetails(eventID, ed)
 	}
-	if ed != nil {
-		m.fetchCache.SetDetails(eventID, *ed)
-	}
-	return ed, nil
+
+	return ed, err
 }
 
 func (m *Provider) GetEvents(opts ...options.ProviderOption) (*models.Events, error) {
@@ -111,7 +104,7 @@ func (m *Provider) GetEvents(opts ...options.ProviderOption) (*models.Events, er
 		}
 	}
 
-	list, err := fetch.Events(m.sourceURL)
+	list, err := fetch.Sync.Events(m.sourceURL)
 	if err != nil {
 		return nil, err
 	}

@@ -73,28 +73,28 @@ func (f EventCache) GetEvents() (*models.Events, time.Time, bool) {
 
 }
 
-func (f EventCache) GetDetails(eventID string) (*models.EventDetails, time.Time, bool) {
+func (f EventCache) GetDetails(eventID string) (models.EventDetails, time.Time, bool) {
 	ret := models.EventDetails{}
 	v, ts, ok := f.internalCache.Get(prefixKey(ret), eventID)
 	if ok {
 		ret, ok = v.(models.EventDetails)
 		if ok {
-			return &ret, ts, ok
+			return ret, ts, ok
 		}
 	}
-	return nil, time.Time{}, false
+	return ret, time.Time{}, false
 }
 
-func (f EventCache) GetAscii(eventID string) (*models.EventAscii, time.Time, bool) {
+func (f EventCache) GetAscii(eventID string) (models.EventAscii, time.Time, bool) {
 	ret := models.EventAscii{}
 	v, ts, ok := f.internalCache.Get(prefixKey(ret), eventID)
 	if ok {
 		ret, ok = v.(models.EventAscii)
 		if ok {
-			return &ret, ts, ok
+			return ret, ts, ok
 		}
 	}
-	return nil, time.Time{}, false
+	return ret, time.Time{}, false
 }
 
 func (f EventCache) SetDetails(eventID string, ed models.EventDetails) bool {

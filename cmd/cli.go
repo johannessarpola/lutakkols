@@ -92,7 +92,7 @@ func init() {
 
 	rootCmd.Flags().StringVarP(&Config.Address, "address", "a", "https://www.jelmu.net", "Server address")
 	rootCmd.Flags().BoolVarP(&Config.Offline, "offline", "o", false, "Run in offline mode")
-	rootCmd.Flags().StringVarP(&Config.InputDir, "input_dir", "i", "input_dir", "Directory to use with offline mode")
+	rootCmd.Flags().StringVarP(&Config.InputDir, "input_dir", "i", ",data", "Directory to use with offline mode")
 	rootCmd.Flags().StringVarP(&Config.LogFile, "logfile", "l", "debug.log", "File to write log into")
 	// Inherited for all
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Verbose")

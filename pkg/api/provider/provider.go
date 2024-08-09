@@ -17,8 +17,8 @@ type Config struct {
 
 type Provider interface {
 	GetEvents(opts ...options.ProviderOption) (*models.Events, error)
-	GetAscii(eventID string, imageURL string, opts ...options.ProviderOption) (*models.EventAscii, error)
-	GetDetails(eventID string, eventURL string, opts ...options.ProviderOption) (*models.EventDetails, error)
+	GetAscii(eventID string, imageURL string, opts ...options.ProviderOption) (models.EventAscii, error)
+	GetDetails(eventID string, eventURL string, opts ...options.ProviderOption) (models.EventDetails, error)
 }
 
 type Downloader interface {

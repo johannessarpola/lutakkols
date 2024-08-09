@@ -21,7 +21,7 @@ import (
 
 type EventViev struct {
 	spinner     spinner.Model
-	details     *models.EventDetails
+	details     models.EventDetails
 	ascii       string
 	title       string
 	viewport    viewport.Model
@@ -51,7 +51,6 @@ func InitEventView(event models.Event, provider provider.Provider) EventViev {
 		loadStarted: time.Now(),
 		DataUpdated: time.Now(),
 		spinner:     newSpinner(),
-		details:     &models.EventDetails{},
 		title:       viewTitle(event),
 		viewport:    viewport.Model{},
 		useWide:     false,
@@ -209,11 +208,8 @@ func (m EventViev) headerView() string {
 }
 
 func (m EventViev) GetUpdatedAt() string {
-	if m.details != nil {
-		dataUpdated := m.details.UpdatedAt.Format("2006-01-02 15:04:05")
-		return fmt.Sprintf("updated at %s", dataUpdated)
-	}
-	return ""
+	dataUpdated := m.details.UpdatedAt.Format("2006-01-02 15:04:05")
+	return fmt.Sprintf("updated at %s", dataUpdated)
 }
 
 func (m EventViev) footerView() string {

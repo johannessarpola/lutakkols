@@ -7,7 +7,6 @@ import (
 	"github.com/johannessarpola/lutakkols/pkg/fetch/selectors"
 	"github.com/johannessarpola/lutakkols/pkg/logger"
 	"github.com/johannessarpola/lutakkols/pkg/pipes"
-	"time"
 )
 
 type asyncSource struct{}
@@ -61,11 +60,11 @@ func (a asyncSource) Events(url string, max int, ctx context.Context) chan model
 
 // Images gets a channel of ascii images for event details, respecting context
 // pointers are used so that there's no copying by value
-func (a asyncSource) Images(eds <-chan models.EventDetails, context context.Context) <-chan pipes.Result[*models.EventAscii] {
-	resChan := make(chan pipes.Result[*models.EventAscii])
+func (a asyncSource) Images(eds <-chan models.EventDetails, context context.Context) <-chan pipes.Result[models.EventAscii] {
+	out := make(chan pipes.Result[models.EventAscii])
 
 	go func() {
-		defer close(resChan)
+		defer close(out)
 		for {
 			select {
 			case <-context.Done():
@@ -74,26 +73,22 @@ func (a asyncSource) Images(eds <-chan models.EventDetails, context context.Cont
 				if !ok {
 					return
 				}
-				v, err := EventImage(ed.ImageURL())
-				resChan <- pipes.Result[*models.EventAscii]{
-					Val: &models.EventAscii{
-						Ascii:     v,
-						EventID:   ed.ID(),
-						UpdatedAt: time.Now(),
-					},
-					Err: err,
+				v, err := Sync.EventImage(ed.ImageURL(), ed.ID())
+				if err != nil {
+					out <- pipes.NewErrResult[models.EventAscii](err)
+				} else {
+					out <- pipes.NewResult(v)
 				}
 			}
 		}
 	}()
 
-	return resChan
+	return out
 }
 
-// Details gets a channel of event details for a event stream, respecting context
-// pointers are used so that there's no copying by value
-func (a asyncSource) Details(eps <-chan models.Event, ctx context.Context) <-chan pipes.Result[*models.EventDetails] {
-	out := make(chan pipes.Result[*models.EventDetails])
+// Details gets a channel of event details for a event stream
+func (a asyncSource) Details(eps <-chan models.Event, ctx context.Context) <-chan pipes.Result[models.EventDetails] {
+	out := make(chan pipes.Result[models.EventDetails])
 	go func() {
 		defer close(out)
 
@@ -105,10 +100,11 @@ func (a asyncSource) Details(eps <-chan models.Event, ctx context.Context) <-cha
 				if !ok {
 					return
 				}
-				v, err := EventDetails(ep.EventURL(), ep.ID())
-				out <- pipes.Result[*models.EventDetails]{
-					Val: v,
-					Err: err,
+				v, err := Sync.EventDetails(ep.EventURL(), ep.ID())
+				if err != nil {
+					out <- pipes.NewErrResult[models.EventDetails](err)
+				} else {
+					out <- pipes.NewResult(v)
 				}
 			}
 		}

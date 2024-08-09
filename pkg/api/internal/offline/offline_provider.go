@@ -60,14 +60,17 @@ func (m *Provider) withInitialOpts(additionalOpts []options.ProviderOption) []op
 }
 
 // GetAscii just prints placeholder string since it is not possible to do this offline (yet)
-func (m *Provider) GetAscii(eventID string, imageURL string, _ ...options.ProviderOption) (*models.EventAscii, error) {
-	return &models.EventAscii{
+func (m *Provider) GetAscii(eventID string, imageURL string, _ ...options.ProviderOption) (models.EventAscii, error) {
+	return models.EventAscii{
 		Ascii:   m.asciiGen(eventID, imageURL),
 		EventID: eventID,
 	}, nil
 }
 
-func (m *Provider) GetDetails(eventID string, _ string, opts ...options.ProviderOption) (*models.EventDetails, error) {
+func (m *Provider) GetDetails(eventID string, _ string, opts ...options.ProviderOption) (models.EventDetails, error) {
+	var ed models.EventDetails
+	var err error
+
 	if m.useCache(opts) {
 		value, ts, ok := m.fetchCache.GetDetails(eventID)
 		if ok {
@@ -77,14 +80,11 @@ func (m *Provider) GetDetails(eventID string, _ string, opts ...options.Provider
 		}
 	}
 
-	ed, err := loadfs.EventDetails(eventID, m.eventDetailsPath)
-	if err != nil {
-		return nil, err
+	ed, err = loadfs.EventDetails(eventID, m.eventDetailsPath)
+	if err == nil {
+		m.fetchCache.SetDetails(eventID, ed)
 	}
-	if ed != nil {
-		m.fetchCache.SetDetails(eventID, *ed)
-	}
-	return ed, nil
+	return ed, err
 }
 
 func (m *Provider) GetEvents(opts ...options.ProviderOption) (*models.Events, error) {

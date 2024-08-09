@@ -60,17 +60,18 @@ func loadAllDetails(fp string) ([]models.EventDetails, error) {
 }
 
 // EventDetails loads a single event detail from the details json file
-func EventDetails(eventID string, fp string) (*models.EventDetails, error) {
+func EventDetails(eventID string, fp string) (models.EventDetails, error) {
 	eventDetails, err := loadAllDetails(fp)
+	var ed models.EventDetails
 	if err != nil {
-		return nil, err
+		return ed, err
 	}
-	for _, ed := range eventDetails {
+	for _, ed = range eventDetails {
 		if eventID == ed.ID() {
-			return &ed, nil
+			return ed, nil
 		}
 	}
-	return nil, notFoundException{
+	return ed, notFoundException{
 		ID:   eventID,
 		Path: fp,
 	}
