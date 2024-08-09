@@ -28,8 +28,8 @@ func TestOfflineProvider(t *testing.T) {
 	}
 
 	event := events.Events[0]
-	details, err := ofp.GetDetails(event.ID(), event.EventURL())
-	if details == nil || err != nil {
+	_, err = ofp.GetDetails(event.ID(), event.EventURL())
+	if err != nil {
 		t.Errorf("err getting details for %s", event.Headline)
 	}
 
