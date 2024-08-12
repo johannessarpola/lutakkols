@@ -77,9 +77,9 @@ func (a asyncSource) Images(eds <-chan models.EventDetails, ctx context.Context)
 
 				var result pipes.Result[models.EventAscii]
 				if err != nil {
-					pipes.SendOrDone(result.WithError(err), out, ctx)
+					pipes.SendOrDone(ctx, result.WithError(err), out)
 				} else {
-					pipes.SendOrDone(result.WithValue(v), out, ctx)
+					pipes.SendOrDone(ctx, result.WithValue(v), out)
 				}
 			}
 		}
@@ -89,7 +89,7 @@ func (a asyncSource) Images(eds <-chan models.EventDetails, ctx context.Context)
 }
 
 // Details gets a channel of event details for a event stream
-func (a asyncSource) Details(eps <-chan models.Event, ctx context.Context) <-chan pipes.Result[models.EventDetails] {
+func (a asyncSource) Details(ctx context.Context, eps <-chan models.Event) <-chan pipes.Result[models.EventDetails] {
 	out := make(chan pipes.Result[models.EventDetails])
 	go func() {
 		defer close(out)
@@ -106,9 +106,9 @@ func (a asyncSource) Details(eps <-chan models.Event, ctx context.Context) <-cha
 
 				var result pipes.Result[models.EventDetails]
 				if err != nil {
-					pipes.SendOrDone(result.WithError(err), out, ctx)
+					pipes.SendOrDone(ctx, result.WithError(err), out)
 				} else {
-					pipes.SendOrDone(result.WithValue(v), out, ctx)
+					pipes.SendOrDone(ctx, result.WithValue(v), out)
 				}
 			}
 		}

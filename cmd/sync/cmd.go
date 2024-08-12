@@ -36,7 +36,7 @@ func Run(conf RunConfig) {
 	defer cancel()
 
 	events := fetch.Async.Events(conf.SourceURL, conf.EventLimit, ctx)
-	e1, e2 := pipes.FanOut(events, ctx)
+	e1, e2 := pipes.FanOut(ctx, events)
 
 	logger.Log.Infof("Writing events into %s", conf.EventsFn)
 
@@ -45,11 +45,11 @@ func Run(conf RunConfig) {
 
 	eventWriteChan = writer.WriteChannel(e1, conf.EventsFn, timeout)
 
-	rateLimitedEvents := pipes.ThrottleChannel(e2, time.Second, ctx)
-	detailResults := fetch.Async.Details(rateLimitedEvents, ctx)
-	details := pipes.FilterError(detailResults, func(err error) {
+	rateLimitedEvents := pipes.ThrottleChannel(ctx, e2, time.Second)
+	detailResults := fetch.Async.Details(ctx, rateLimitedEvents)
+	details := pipes.FilterError(ctx, detailResults, func(err error) {
 		logger.Log.Warn("details error ", err)
-	}, ctx)
+	})
 	detailsWriteChan = writer.WriteChannel(details, conf.EventDetailsFn, timeout)
 
 	var dwr1, dwr2 bool

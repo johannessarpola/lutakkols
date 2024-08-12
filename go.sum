@@ -92,8 +92,8 @@ github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/jawher/mow.cli v1.1.0/go.mod h1:aNaQlc7ozF3vw6IJ2dHjp2ZFiA4ozMIYY6PyuRJwlUg=
-github.com/johannessarpola/pipes v1.0.0 h1:LCtE7fqulEWeCjnpIl+cidHwITAV/A8zKRj9wpHwfRY=
-github.com/johannessarpola/pipes v1.0.0/go.mod h1:QRiFsaa+1sc0RmY3x8CSk7ac4JcmeBTqUxLr6JqEzRE=
+github.com/johannessarpola/pipes v1.1.0 h1:JknoRR01T0vNiukg57NogeWDaMrtU7K3LEcHd7wZPHc=
+github.com/johannessarpola/pipes v1.1.0/go.mod h1:QRiFsaa+1sc0RmY3x8CSk7ac4JcmeBTqUxLr6JqEzRE=
 github.com/kennygrant/sanitize v1.2.4 h1:gN25/otpP5vAsO2djbMhF/LQX6R7+O1TB4yv8NzpJ3o=
 github.com/kennygrant/sanitize v1.2.4/go.mod h1:LGsjYYtgxbetdg5owWB2mpgUL6e2nfw2eObZ0u0qvak=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=

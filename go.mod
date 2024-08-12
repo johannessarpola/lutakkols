@@ -7,6 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.26.6
 	github.com/charmbracelet/lipgloss v0.11.0
 	github.com/gocolly/colly/v2 v2.1.0
+	github.com/johannessarpola/pipes v1.1.0
 	github.com/maypok86/otter v1.2.1
 	github.com/qeesung/image2ascii v1.0.1
 	github.com/spf13/cobra v1.8.1
@@ -35,7 +36,6 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/johannessarpola/pipes v1.0.0 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

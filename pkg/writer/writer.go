@@ -47,9 +47,9 @@ func WriteChannel[T any](chn <-chan T, filename string, timeout time.Duration) c
 		defer cancel()
 
 		// head is passed on to pipes.Pour as initial array as there should be a different timeout for listen and write
-		err := pipes.Pour(chn, func(elements []T) error {
+		err := pipes.Pour(ctx, chn, func(elements []T) error {
 			return WriteJson(elements, filename, PrettyPrint)
-		}, ctx, head)
+		}, head)
 
 		if err != nil {
 			logger.Log.Error("write error", err)
