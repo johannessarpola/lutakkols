@@ -7,7 +7,7 @@ You can view the help with `lutakkols -help` but should run just calling `lutakk
 
 To install you can use `go install github.com/johannessarpola/lutakkols@latest` and it should work just fine. 
 
-It can also be run with docker by building the `Dockerfile` with `docker build <image>:<tag>` 
+It can also be run with docker by building the `Dockerfile` with `docker build . -t <image>:<tag>` 
 and then running it with ` docker run -it --rm <image>:<tag>`. Notice that the `-it` is required to capture TTY.
 
 ## Screenshots
