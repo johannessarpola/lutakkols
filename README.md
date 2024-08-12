@@ -6,6 +6,10 @@ Can be used also in offline mode after syncing events from the site with `sync` 
 You can view the help with `lutakkols -help` but should run just calling `lutakkols` after you've installed it and added into $PATH. 
 
 To install you can use `go install github.com/johannessarpola/lutakkols@latest` and it should work just fine. 
+
+It can also be run with docker by building the `Dockerfile` with `docker build <image>:<tag>` 
+and then running it with ` docker run -it --rm <image>:<tag>`. Notice that the `-it` is required to capture TTY.
+
 ## Screenshots
 
 List shows the upcoming events in which you cna use for example arrows on keyboard to navigate.
