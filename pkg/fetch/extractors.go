@@ -101,6 +101,15 @@ func extractDoorPrice(e *colly.HTMLElement) models.DoorPrice {
 	return ""
 }
 
+func extractBulletPoints(e *colly.HTMLElement) []string {
+	var points []string
+	spans := e.ChildTexts(selectors.BulletPoints)
+	for _, p := range spans {
+		points = append(points, strings.TrimSpace(p))
+	}
+	return points
+}
+
 func extractEvent(e *colly.HTMLElement) models.Event {
 
 	eventLink := e.ChildAttr(selectors.EventLink, "href")
@@ -117,6 +126,7 @@ func extractEvent(e *colly.HTMLElement) models.Event {
 	evt.SmallImageLink = imageLink
 	evt.Weekday = weekDay
 	evt.Date = date
+	evt.BulletPoints = extractBulletPoints(e)
 	evt.Headline = cleanupHeadline(headline)
 	evt.InStock = inStock
 

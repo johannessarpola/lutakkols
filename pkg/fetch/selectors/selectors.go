@@ -11,6 +11,8 @@ const (
 	EventProductInfoParts = "span"
 	EventLink             = "a:first-child"
 	EventStoreLink        = "a:nth-child(2)"
+	Headline2             = "h2:first-child"
+	BulletPoints          = "div:last-child > span"
 	EventSmallImage       = "img"
 	EventWeekDay          = "p.datetime > span:first-child"
 	EventDate             = "p.datetime > span.date"
