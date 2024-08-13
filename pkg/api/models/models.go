@@ -14,6 +14,7 @@ type Event struct {
 	Date           string    `json:"date"`
 	StoreLink      string    `json:"store_ink"`
 	InStock        bool      `json:"in_stock"`
+	BulletPoints   []string  `json:"bullet_points"`
 	UpdatedAt      time.Time `json:"updated_at,omitempty"`
 }
 

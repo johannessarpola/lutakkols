@@ -77,7 +77,8 @@ func (m EventList) configureList(items []list.Item) list.Model {
 
 	headerHeight := lipgloss.Height(m.Header())
 	footerHeight := lipgloss.Height(m.Footer())
-	delegate := list.NewDefaultDelegate()
+	delegate := customizedDelegate()
+
 	slm := list.New(items, delegate, constants.WindowSize.Width, constants.WindowSize.Height-headerHeight-footerHeight)
 	setupListModel(&slm)
 	return slm

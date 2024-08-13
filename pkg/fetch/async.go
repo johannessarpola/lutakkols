@@ -26,7 +26,7 @@ func (a asyncSource) Events(url string, max int, ctx context.Context) chan model
 
 		c.OnHTML(selectors.Events, func(e *colly.HTMLElement) {
 
-			if len(events) == max {
+			if len(events) == max && max != 0 {
 				return
 			}
 
