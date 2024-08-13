@@ -13,7 +13,7 @@ func customizeDelegate(d list.DefaultDelegate) list.ItemDelegate {
 		Padding(0, 0, 0, 1)
 
 	d.Styles.SelectedDesc = d.Styles.SelectedTitle.Copy().
-		Foreground(lipgloss.AdaptiveColor{Light: "#4242f5", Dark: "#f5d742"})
+		Foreground(lipgloss.AdaptiveColor{Light: "#2e2eb0", Dark: "#ba6d0f"})
 
 	return d
 }
