@@ -180,9 +180,10 @@ func initializeList(provider provider.Provider) (tea.Model, tea.Cmd) {
 
 func (m EventList) Footer() string {
 	uts := updatedAtStyle.Render(m.GetUpdatedAt())
+	padded := infoBoxStyle.Render(uts)
 	h := m.help.View(m.list)
-	l := lipgloss.PlaceHorizontal(m.WindowSize.w/2, lipgloss.Left, h)
-	r := lipgloss.PlaceHorizontal(m.WindowSize.w/2, lipgloss.Right, uts)
+	l := lipgloss.PlaceHorizontal(constants.WindowSize.Width/2, lipgloss.Left, h)
+	r := lipgloss.PlaceHorizontal(constants.WindowSize.Width/2, lipgloss.Right, padded)
 
 	return footerStyle.Render(lipgloss.JoinHorizontal(lipgloss.Top, l, r))
 }

@@ -28,7 +28,7 @@ var (
 	paginationStyle       = lipgloss.NewStyle().PaddingLeft(2)
 	subduedColor          = lipgloss.AdaptiveColor{Light: "#9B9B9B", Dark: "#5C5C5C"}
 	titleBoxStyle         = lipgloss.NewStyle().MarginBottom(1)
-	updatedAtStyle        = lipgloss.NewStyle().Foreground(subduedColor).Align(lipgloss.Right)
+	updatedAtStyle        = lipgloss.NewStyle().Foreground(subduedColor)
 	asciiPlaceholderStyle = lipgloss.NewStyle().Width(asciiWidth * 0.7).Padding(1)
 )
 
