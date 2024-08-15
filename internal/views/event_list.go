@@ -19,6 +19,11 @@ import (
 	"time"
 )
 
+type WindowSize struct {
+	w int
+	h int
+}
+
 type EventList struct {
 	list        list.Model
 	help        help.Model
@@ -27,6 +32,7 @@ type EventList struct {
 	Quitting    bool
 	provider    provider.Provider
 	DataUpdated time.Time
+	WindowSize  WindowSize
 }
 
 func massageItems(events []models.Event) []list.Item {
@@ -125,6 +131,10 @@ func (m EventList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Height: newHeight,
 		}
 		m.list, c = m.list.Update(newMsg)
+		m.WindowSize = WindowSize{
+			w: msg.Width,
+			h: msg.Height,
+		}
 		return m, c
 	case messages.EventsFetched:
 		i := massageItems(msg.Events)
@@ -160,23 +170,19 @@ func (m EventList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func initializeList(provider provider.Provider) (tea.Model, tea.Cmd) {
-	ll := NewEventsList(provider)
-	_, ws := ll.Update(constants.WindowSize)
-	// this doesn't call init() since it is not started with tea.NewProgram
-	f := cmd.GetEvents(provider)
-	_, uf := ll.Update(f)
-	ticker := ll.spinner.Tick
-
-	return ll, tea.Sequence(ws, ticker, f, uf)
+	newList := NewEventsList(provider)
+	init := newList.Init()
+	tick := newList.spinner.Tick
+	_, update := newList.Update(constants.WindowSize)
+	return newList, tea.Sequence(init, update, tick)
 
 }
 
 func (m EventList) Footer() string {
-	w := m.list.Width()
-	h := m.help.View(m.list)
 	uts := updatedAtStyle.Render(m.GetUpdatedAt())
-	l := lipgloss.PlaceHorizontal(w/2, lipgloss.Left, h)
-	r := lipgloss.PlaceHorizontal(w/2, lipgloss.Right, uts)
+	h := m.help.View(m.list)
+	l := lipgloss.PlaceHorizontal(m.WindowSize.w/2, lipgloss.Left, h)
+	r := lipgloss.PlaceHorizontal(m.WindowSize.w/2, lipgloss.Right, uts)
 
 	return footerStyle.Render(lipgloss.JoinHorizontal(lipgloss.Top, l, r))
 }
