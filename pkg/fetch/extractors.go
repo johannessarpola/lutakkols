@@ -32,13 +32,17 @@ func extractSummary(e *colly.HTMLElement) []string {
 	//	summary := strings.Join(e.ChildTexts(paragraphNoClassSelector), "\n")
 	var items []string
 	e.ForEach(selectors.ParagraphNoClass, func(i int, element *colly.HTMLElement) {
-		htmlContent, _ := element.DOM.Html()
+		// Drop paragraphs under product info mobile which is a sub div inside the .summary div
+		if element.DOM.ParentsFiltered(selectors.EventProductInfoMobile).Length() == 0 {
+			htmlContent, _ := element.DOM.Html()
 
-		withLineBreaks := strings.ReplaceAll(htmlContent, "<br>", "\n")
-		withLineBreaks = strings.ReplaceAll(withLineBreaks, "<br/>", "\n")
+			withLineBreaks := strings.ReplaceAll(htmlContent, "<br>", "\n")
+			withLineBreaks = strings.ReplaceAll(withLineBreaks, "<br/>", "\n")
 
-		withoutHtml := stripHTML(withLineBreaks)
-		items = append(items, withoutHtml)
+			withoutHtml := stripHTML(withLineBreaks)
+			items = append(items, withoutHtml)
+		}
+
 	})
 
 	return items
